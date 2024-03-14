@@ -1,9 +1,8 @@
 """JSONPath node and node list definitions."""
 
 from typing import Any
+from typing import Dict
 from typing import List
-from typing import Mapping
-from typing import Sequence
 from typing import Tuple
 from typing import Union
 
@@ -27,11 +26,11 @@ class JSONPathNode:
         *,
         value: object,
         parts: Tuple[Union[int, str], ...],
-        root: Union[Sequence[Any], Mapping[str, Any]],
+        root: Union[List[Any], Dict[str, Any], str],
     ) -> None:
         self.value: object = value
         self.parts: Tuple[Union[int, str], ...] = parts
-        self.root: Union[Sequence[Any], Mapping[str, Any]] = root
+        self.root: Union[List[Any], Dict[str, Any], str] = root
 
     def path(self) -> str:
         """Return the normalized path to this node."""

@@ -4,12 +4,11 @@ from __future__ import annotations
 
 from abc import ABC
 from abc import abstractmethod
-from collections.abc import Mapping
-from collections.abc import Sequence
 from contextlib import suppress
 from typing import TYPE_CHECKING
 from typing import Iterable
 from typing import Optional
+from typing import Sequence
 
 from .exceptions import JSONPathIndexError
 from .exceptions import JSONPathTypeError
@@ -72,8 +71,8 @@ class PropertySelector(JSONPathSelector):
         return hash((self.name, self.token))
 
     def resolve(self, node: JSONPathNode) -> Iterable[JSONPathNode]:
-        """Select a value from a mappings by its key."""
-        if isinstance(node.value, Mapping):
+        """Select a value from a dict/object by its property/key."""
+        if isinstance(node.value, dict):
             with suppress(KeyError):
                 yield JSONPathNode(
                     value=node.value[self.name],
@@ -121,7 +120,7 @@ class IndexSelector(JSONPathSelector):
 
     def resolve(self, node: JSONPathNode) -> Iterable[JSONPathNode]:
         """Select an element from an array by index."""
-        if isinstance(node.value, Sequence) and not isinstance(node.value, str):
+        if isinstance(node.value, list):
             norm_index = self._normalized_index(node.value)
             with suppress(IndexError):
                 _node = JSONPathNode(
@@ -133,7 +132,7 @@ class IndexSelector(JSONPathSelector):
 
 
 class SliceSelector(JSONPathSelector):
-    """Sequence slicing selector."""
+    """Array/List slicing selector."""
 
     __slots__ = ("slice",)
 
@@ -179,8 +178,8 @@ class SliceSelector(JSONPathSelector):
         return index
 
     def resolve(self, node: JSONPathNode) -> Iterable[JSONPathNode]:
-        """Select a range of values from an array/sequence."""
-        if isinstance(node.value, Sequence) and self.slice.step != 0:
+        """Select a range of values from an array/list."""
+        if isinstance(node.value, list) and self.slice.step != 0:
             idx = self.slice.start or 0
             step = self.slice.step or 1
             for obj in node.value[self.slice]:
@@ -210,8 +209,8 @@ class WildSelector(JSONPathSelector):
         return hash(self.token)
 
     def resolve(self, node: JSONPathNode) -> Iterable[JSONPathNode]:
-        """Select all items from a sequence/array or values from a mapping/object."""
-        if isinstance(node.value, Mapping):
+        """Select all items from a array/list or values from a dict/object."""
+        if isinstance(node.value, dict):
             for key, val in node.value.items():
                 _node = JSONPathNode(
                     value=val,
@@ -220,7 +219,7 @@ class WildSelector(JSONPathSelector):
                 )
                 yield _node
 
-        elif isinstance(node.value, Sequence) and not isinstance(node.value, str):
+        elif isinstance(node.value, list):
             for i, val in enumerate(node.value):
                 _node = JSONPathNode(
                     value=val,
@@ -231,7 +230,7 @@ class WildSelector(JSONPathSelector):
 
 
 class Filter(JSONPathSelector):
-    """Filter sequence/array items or mapping/object values with a filter expression."""
+    """Filter array/list items or dict/object values with a filter expression."""
 
     __slots__ = ("expression",)
 
@@ -259,8 +258,8 @@ class Filter(JSONPathSelector):
         return hash((str(self.expression), self.token))
 
     def resolve(self, node: JSONPathNode) -> Iterable[JSONPathNode]:
-        """Select sequence items or mapping values where with filter expression."""
-        if isinstance(node.value, Mapping):
+        """Select array/list items or dict/object values where with a filter."""
+        if isinstance(node.value, dict):
             for key, val in node.value.items():
                 context = FilterContext(
                     env=self.env,
@@ -279,7 +278,7 @@ class Filter(JSONPathSelector):
                         err.token = self.token
                     raise
 
-        elif isinstance(node.value, Sequence) and not isinstance(node.value, str):
+        elif isinstance(node.value, list):
             for i, value in enumerate(node.value):
                 context = FilterContext(
                     env=self.env,

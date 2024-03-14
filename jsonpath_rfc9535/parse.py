@@ -451,6 +451,7 @@ class Parser:
             self._raise_for_non_comparable_function(right, tok)
             return ComparisonExpression(tok, left, operator, right)
 
+        # TODO: check for valid basic expressions
         return LogicalExpression(tok, left, operator, right)
 
     def parse_grouped_expression(self, stream: TokenStream) -> Expression:

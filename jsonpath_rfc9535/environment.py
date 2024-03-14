@@ -11,9 +11,7 @@ from typing import Any
 from typing import Dict
 from typing import Iterable
 from typing import List
-from typing import Mapping
 from typing import Optional
-from typing import Sequence
 from typing import Type
 from typing import Union
 
@@ -77,13 +75,13 @@ class JSONPathEnvironment:
     def finditer(
         self,
         path: str,
-        data: Union[Sequence[Any], Mapping[str, Any], str],
+        data: Union[List[Any], Dict[str, Any], str],
     ) -> Iterable[JSONPathNode]:
         """Generate `JSONPathNode` instances for each match of _path_ in _data_.
 
         Arguments:
             path: A JSONPath query string.
-            data: A Python object implementing the `Sequence` or `Mapping` interfaces.
+            data: JSON-like data to query, as you'd get from `json.load`.
 
         Returns:
             An iterator yielding `JSONPathNode` objects for each match.
@@ -98,13 +96,13 @@ class JSONPathEnvironment:
     def findall(
         self,
         path: str,
-        data: Union[Sequence[Any], Mapping[str, Any], str],
+        data: Union[List[Any], Dict[str, Any], str],
     ) -> List[object]:
         """Find all values in _data_ matching JSONPath query _path_.
 
         Arguments:
             path: A JSONPath query string.
-            data: A Python object implementing the `Sequence` or `Mapping` interfaces.
+            data: JSON-like data to query, as you'd get from `json.load`.
 
         Returns:
             A list of matched values. If there are no matches, the list will be empty.
@@ -119,13 +117,13 @@ class JSONPathEnvironment:
     def query(
         self,
         path: str,
-        data: Union[Sequence[Any], Mapping[str, Any], str],
+        data: Union[List[Any], Dict[str, Any], str],
     ) -> JSONPathNodeList:
         """Apply the JSONPath query _path_ to JSON-like _data_.
 
         Arguments:
             path: A JSONPath query string.
-            data: A Python object implementing the `Sequence` or `Mapping` interfaces.
+            data: JSON-like data to query, as you'd get from `json.load`.
 
         Returns:
             A list of `JSONPathNode` instance.

@@ -10,9 +10,7 @@ from dataclasses import dataclass
 from typing import Any
 from typing import Dict
 from typing import List
-from typing import Mapping
 from typing import Optional
-from typing import Sequence
 from typing import Union
 
 import pytest
@@ -24,7 +22,7 @@ import jsonpath_rfc9535 as jsonpath
 class Case:
     name: str
     selector: str
-    document: Union[Mapping[str, Any], Sequence[Any], None] = None
+    document: Union[Dict[str, Any], List[Any], None] = None
     result: Any = None
     results: Optional[List[Any]] = None
     invalid_selector: Optional[bool] = None

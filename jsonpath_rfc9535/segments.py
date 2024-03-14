@@ -4,8 +4,6 @@ from __future__ import annotations
 
 from abc import ABC
 from abc import abstractmethod
-from collections.abc import Mapping
-from collections.abc import Sequence
 from typing import TYPE_CHECKING
 from typing import Iterable
 from typing import Tuple
@@ -74,22 +72,22 @@ class JSONPathRecursiveDescentSegment(JSONPathSegment):
 
     def _visit(self, node: JSONPathNode) -> Iterable[JSONPathNode]:
         yield node
-        if isinstance(node.value, Mapping):
+        if isinstance(node.value, dict):
             for key, val in node.value.items():
-                if isinstance(val, str):
-                    continue
-                elif isinstance(val, (Mapping, Sequence)):
+                # if isinstance(val, str):
+                #     continue
+                if isinstance(val, (dict, list)):
                     _node = JSONPathNode(
                         value=val,
                         parts=node.parts + (key,),
                         root=node.root,
                     )
                     yield from self._visit(_node)
-        elif isinstance(node.value, Sequence) and not isinstance(node.value, str):
+        elif isinstance(node.value, list):
             for i, val in enumerate(node.value):
                 if isinstance(val, str):
                     continue
-                elif isinstance(val, (Mapping, Sequence)):
+                elif isinstance(val, (dict, list)):
                     _node = JSONPathNode(
                         value=val,
                         parts=node.parts + (i,),

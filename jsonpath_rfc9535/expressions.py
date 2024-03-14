@@ -7,9 +7,9 @@ from abc import ABC
 from abc import abstractmethod
 from typing import TYPE_CHECKING
 from typing import Any
+from typing import Dict
 from typing import Generic
 from typing import List
-from typing import Mapping
 from typing import Sequence
 from typing import TypeVar
 from typing import Union
@@ -257,9 +257,7 @@ class CurrentPath(Path):
 
     def evaluate(self, context: FilterContext) -> object:
         """Evaluate the filter expression in the given _context_."""
-        if not isinstance(context.current, (Sequence, Mapping)) or isinstance(
-            context.current, str
-        ):
+        if not isinstance(context.current, (list, dict)):
             if self.path.empty():
                 return context.current
             return JSONPathNodeList()
@@ -351,7 +349,7 @@ class FilterContext:
         *,
         env: JSONPathEnvironment,
         current: object,
-        root: Union[Sequence[Any], Mapping[str, Any]],
+        root: Union[List[Any], Dict[str, Any], str],
     ) -> None:
         self.env = env
         self.current = current

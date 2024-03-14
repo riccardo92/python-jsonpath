@@ -270,11 +270,11 @@ def lex_inside_bracketed_segment(l: Lexer) -> Optional[StateFn]:  # noqa: PLR091
             continue
 
         if c == "'":
-            # Quoted mapping/object key/property name
+            # Quoted dict/object key/property name
             return lex_single_quoted_string_inside_bracket_segment
 
         if c == '"':
-            # Quoted mapping/object key/property name
+            # Quoted dict/object key/property name
             return lex_double_quoted_string_inside_bracket_segment
 
         # default

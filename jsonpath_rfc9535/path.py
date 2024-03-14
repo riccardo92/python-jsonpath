@@ -4,10 +4,9 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 from typing import Any
+from typing import Dict
 from typing import Iterable
 from typing import List
-from typing import Mapping
-from typing import Sequence
 from typing import Tuple
 from typing import Union
 
@@ -54,12 +53,12 @@ class JSONPath:
 
     def finditer(
         self,
-        data: Union[Sequence[Any], Mapping[str, Any], str],
+        data: Union[List[Any], Dict[str, Any], str],
     ) -> Iterable[JSONPathNode]:
         """Generate `JSONPathNode` instances for each match of this path in _data_.
 
         Arguments:
-            data: A Python object implementing the `Sequence` or `Mapping` interfaces.
+            data: JSON-like data to query, as you'd get from `json.load`.
 
         Returns:
             An iterator yielding `JSONPathNode` objects for each match.
@@ -84,12 +83,12 @@ class JSONPath:
 
     def findall(
         self,
-        data: Union[Sequence[Any], Mapping[str, Any], str],
+        data: Union[List[Any], Dict[str, Any], str],
     ) -> List[object]:
         """Find all values in _data_ matching this JSONPath.
 
         Arguments:
-            data: A Python object implementing the `Sequence` or `Mapping` interfaces.
+            data: JSON-like data to query, as you'd get from `json.load`.
 
         Returns:
             A list of matched values. If there are no matches, the list will be empty.
@@ -103,12 +102,12 @@ class JSONPath:
 
     def query(
         self,
-        data: Union[Sequence[Any], Mapping[str, Any], str],
+        data: Union[List[Any], Dict[str, Any], str],
     ) -> JSONPathNodeList:
         """Apply this JSONPath query to JSON-like _data_ and return a node list.
 
         Arguments:
-            data: A Python object implementing the `Sequence` or `Mapping` interfaces.
+            data: JSON-like data to query, as you'd get from `json.load`.
 
         Returns:
             A list of `JSONPathNode` instance.

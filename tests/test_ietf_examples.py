@@ -39,8 +39,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 import dataclasses
 import operator
 from typing import Any
-from typing import Mapping
-from typing import Sequence
+from typing import Dict
+from typing import List
 from typing import Union
 
 import pytest
@@ -52,8 +52,8 @@ from jsonpath_rfc9535 import JSONPathEnvironment
 class Case:
     description: str
     path: str
-    data: Union[Sequence[Any], Mapping[str, Any]]
-    want: Union[Sequence[Any], Mapping[str, Any]]
+    data: Union[List[Any], Dict[str, Any]]
+    want: Union[List[Any], Dict[str, Any]]
 
 
 FILTER_SELECTOR_DATA = {
