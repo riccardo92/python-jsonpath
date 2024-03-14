@@ -37,6 +37,18 @@ if TYPE_CHECKING:
     from .tokens import Token
 
 
+JSONLikeData = Union[
+    List[Any],
+    Dict[str, Any],
+    str,
+    int,
+    float,
+    None,
+    bool,
+]
+"""JSON-like data, as you would get from `json.load()`."""
+
+
 class JSONPathEnvironment:
     """JSONPath configuration.
 
@@ -89,7 +101,7 @@ class JSONPathEnvironment:
     def finditer(
         self,
         path: str,
-        data: Union[List[Any], Dict[str, Any], str],
+        data: JSONLikeData,
     ) -> Iterable[JSONPathNode]:
         """Generate `JSONPathNode` instances for each match of _path_ in _data_.
 
@@ -110,7 +122,7 @@ class JSONPathEnvironment:
     def findall(
         self,
         path: str,
-        data: Union[List[Any], Dict[str, Any], str],
+        data: JSONLikeData,
     ) -> List[object]:
         """Find all values in _data_ matching JSONPath query _path_.
 
@@ -131,7 +143,7 @@ class JSONPathEnvironment:
     def query(
         self,
         path: str,
-        data: Union[List[Any], Dict[str, Any], str],
+        data: JSONLikeData,
     ) -> JSONPathNodeList:
         """Apply the JSONPath query _path_ to JSON-like _data_.
 

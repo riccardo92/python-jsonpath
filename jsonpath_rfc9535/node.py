@@ -1,10 +1,14 @@
 """JSONPath node and node list definitions."""
 
-from typing import Any
-from typing import Dict
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
 from typing import List
 from typing import Tuple
 from typing import Union
+
+if TYPE_CHECKING:
+    from .environment import JSONLikeData
 
 
 class JSONPathNode:
@@ -26,11 +30,11 @@ class JSONPathNode:
         *,
         value: object,
         parts: Tuple[Union[int, str], ...],
-        root: Union[List[Any], Dict[str, Any], str],
+        root: JSONLikeData,
     ) -> None:
         self.value: object = value
         self.parts: Tuple[Union[int, str], ...] = parts
-        self.root: Union[List[Any], Dict[str, Any], str] = root
+        self.root = root
 
     def path(self) -> str:
         """Return the normalized path to this node."""
@@ -53,14 +57,14 @@ class JSONPathNodeList(List[JSONPathNode]):
         return [node.value for node in self]
 
     def values_or_singular(self) -> object:
-        """Return the values from this node list."""
+        """Return values from this node list, or a single value if there's one node."""
         if len(self) == 1:
             return self[0].value
         return [node.value for node in self]
 
     def empty(self) -> bool:
         """Return `True` if this node list is empty."""
-        return not bool(self)
+        return not self
 
     def __str__(self) -> str:
         return f"NodeList{super().__str__()}"

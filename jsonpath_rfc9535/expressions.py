@@ -6,13 +6,10 @@ import json
 from abc import ABC
 from abc import abstractmethod
 from typing import TYPE_CHECKING
-from typing import Any
-from typing import Dict
 from typing import Generic
 from typing import List
 from typing import Sequence
 from typing import TypeVar
-from typing import Union
 
 from jsonpath_rfc9535.function_extensions.filter_function import ExpressionType
 from jsonpath_rfc9535.function_extensions.filter_function import FilterFunction
@@ -21,6 +18,7 @@ from .exceptions import JSONPathTypeError
 from .node import JSONPathNodeList
 
 if TYPE_CHECKING:
+    from .environment import JSONLikeData
     from .environment import JSONPathEnvironment
     from .path import JSONPath
     from .tokens import Token
@@ -349,7 +347,7 @@ class FilterContext:
         *,
         env: JSONPathEnvironment,
         current: object,
-        root: Union[List[Any], Dict[str, Any], str],
+        root: JSONLikeData,
     ) -> None:
         self.env = env
         self.current = current

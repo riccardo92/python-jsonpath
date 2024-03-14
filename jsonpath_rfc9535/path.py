@@ -3,12 +3,9 @@
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
-from typing import Any
-from typing import Dict
 from typing import Iterable
 from typing import List
 from typing import Tuple
-from typing import Union
 
 from .node import JSONPathNode
 from .node import JSONPathNodeList
@@ -17,6 +14,7 @@ from .selectors import IndexSelector
 from .selectors import PropertySelector
 
 if TYPE_CHECKING:
+    from .environment import JSONLikeData
     from .environment import JSONPathEnvironment
     from .segments import JSONPathSegment
 
@@ -53,7 +51,7 @@ class JSONPath:
 
     def finditer(
         self,
-        data: Union[List[Any], Dict[str, Any], str],
+        data: JSONLikeData,
     ) -> Iterable[JSONPathNode]:
         """Generate `JSONPathNode` instances for each match of this path in _data_.
 
@@ -83,7 +81,7 @@ class JSONPath:
 
     def findall(
         self,
-        data: Union[List[Any], Dict[str, Any], str],
+        data: JSONLikeData,
     ) -> List[object]:
         """Find all values in _data_ matching this JSONPath.
 
@@ -102,7 +100,7 @@ class JSONPath:
 
     def query(
         self,
-        data: Union[List[Any], Dict[str, Any], str],
+        data: JSONLikeData,
     ) -> JSONPathNodeList:
         """Apply this JSONPath query to JSON-like _data_ and return a node list.
 
