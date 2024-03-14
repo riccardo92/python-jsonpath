@@ -150,7 +150,7 @@ class MockFoo(FilterFunction):
     return_type = ExpressionType.NODES
 
     def __call__(self, nodes: JSONPathNodeList) -> JSONPathNodeList:  # noqa: D102
-        return nodes
+        return nodes  # no cov
 
 
 class MockBar(FilterFunction):
@@ -158,7 +158,7 @@ class MockBar(FilterFunction):
     return_type = ExpressionType.LOGICAL
 
     def __call__(self) -> bool:  # noqa: D102
-        return False
+        return False  # no cov
 
 
 class MockBn(FilterFunction):
@@ -166,7 +166,7 @@ class MockBn(FilterFunction):
     return_type = ExpressionType.LOGICAL
 
     def __call__(self, _: object) -> bool:  # noqa: D102
-        return False
+        return False  # no cov
 
 
 class MockBl(FilterFunction):
@@ -174,7 +174,7 @@ class MockBl(FilterFunction):
     return_type = ExpressionType.LOGICAL
 
     def __call__(self, _: object) -> bool:  # noqa: D102
-        return False
+        return False  # no cov
 
 
 @pytest.fixture()

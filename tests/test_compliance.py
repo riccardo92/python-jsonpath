@@ -50,7 +50,7 @@ def invalid_cases() -> List[Case]:
 @pytest.mark.parametrize("case", valid_cases(), ids=operator.attrgetter("name"))
 def test_compliance(case: Case) -> None:
     if case.name in SKIP:
-        pytest.skip(reason=SKIP[case.name])
+        pytest.skip(reason=SKIP[case.name])  # no cov
 
     assert case.document is not None
     rv = jsonpath.JSONPathNodeList(
@@ -66,7 +66,7 @@ def test_compliance(case: Case) -> None:
 @pytest.mark.parametrize("case", invalid_cases(), ids=operator.attrgetter("name"))
 def test_invalid_selectors(case: Case) -> None:
     if case.name in SKIP:
-        pytest.skip(reason=SKIP[case.name])
+        pytest.skip(reason=SKIP[case.name])  # no cov
 
     with pytest.raises(jsonpath.JSONPathError):
         jsonpath.compile(case.selector)
