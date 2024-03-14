@@ -35,6 +35,7 @@ from .tokens import TokenStream
 if TYPE_CHECKING:
     from .expressions import Expression
     from .node import JSONPathNode
+    from .node import JSONPathNodeList
     from .tokens import Token
 
 
@@ -71,11 +72,55 @@ class JSONPathEnvironment:
         """
         tokens = tokenize(path)
         stream = TokenStream(tokens)
-        return JSONPath(env=self, segments=self.parser.parse(stream))
+        return JSONPath(env=self, segments=tuple(self.parser.parse(stream)))
+
+    def finditer(
+        self,
+        path: str,
+        data: Union[Sequence[Any], Mapping[str, Any], str],
+    ) -> Iterable[JSONPathNode]:
+        """Generate `JSONPathNode` instances for each match of _path_ in _data_.
+
+        Arguments:
+            path: A JSONPath query string.
+            data: A Python object implementing the `Sequence` or `Mapping` interfaces.
+
+        Returns:
+            An iterator yielding `JSONPathNode` objects for each match.
+
+        Raises:
+            JSONPathSyntaxError: If the path is invalid.
+            JSONPathTypeError: If a filter expression attempts to use types in
+                an incompatible way.
+        """
+        return self.compile(path).finditer(data)
+
+    def findall(
+        self,
+        path: str,
+        data: Union[Sequence[Any], Mapping[str, Any], str],
+    ) -> List[object]:
+        """Find all values in _data_ matching JSONPath query _path_.
+
+        Arguments:
+            path: A JSONPath query string.
+            data: A Python object implementing the `Sequence` or `Mapping` interfaces.
+
+        Returns:
+            A list of matched values. If there are no matches, the list will be empty.
+
+        Raises:
+            JSONPathSyntaxError: If the path is invalid.
+            JSONPathTypeError: If a filter expression attempts to use types in
+                an incompatible way.
+        """
+        return self.compile(path).findall(data)
 
     def query(
-        self, path: str, data: Union[Sequence[Any], Mapping[str, Any]]
-    ) -> Iterable[JSONPathNode]:
+        self,
+        path: str,
+        data: Union[Sequence[Any], Mapping[str, Any], str],
+    ) -> JSONPathNodeList:
         """Apply the JSONPath query _path_ to JSON-like _data_.
 
         Arguments:
@@ -83,7 +128,7 @@ class JSONPathEnvironment:
             data: A Python object implementing the `Sequence` or `Mapping` interfaces.
 
         Returns:
-            An iterator yielding `JSONPathMatch` objects for each match.
+            A list of `JSONPathNode` instance.
 
         Raises:
             JSONPathSyntaxError: If the path is invalid.

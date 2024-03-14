@@ -8,6 +8,7 @@ from collections.abc import Mapping
 from collections.abc import Sequence
 from typing import TYPE_CHECKING
 from typing import Iterable
+from typing import Tuple
 
 from .node import JSONPathNode
 
@@ -27,7 +28,7 @@ class JSONPathSegment(ABC):
         *,
         env: JSONPathEnvironment,
         token: Token,
-        selectors: Sequence[JSONPathSelector],
+        selectors: Tuple[JSONPathSelector, ...],
     ) -> None:
         self.env = env
         self.token = token
@@ -80,7 +81,7 @@ class JSONPathRecursiveDescentSegment(JSONPathSegment):
                 elif isinstance(val, (Mapping, Sequence)):
                     _node = JSONPathNode(
                         value=val,
-                        location=node.location + (key,),
+                        parts=node.parts + (key,),
                         root=node.root,
                     )
                     yield from self._visit(_node)
@@ -91,7 +92,7 @@ class JSONPathRecursiveDescentSegment(JSONPathSegment):
                 elif isinstance(val, (Mapping, Sequence)):
                     _node = JSONPathNode(
                         value=val,
-                        location=node.location + (i,),
+                        parts=node.parts + (i,),
                         root=node.root,
                     )
                     yield from self._visit(_node)

@@ -37,4 +37,6 @@ __all__ = (
 # For convenience
 DEFAULT_ENV = JSONPathEnvironment()
 compile = DEFAULT_ENV.compile  # noqa: A001
+findall = DEFAULT_ENV.findall
+finditer = DEFAULT_ENV.finditer
 query = DEFAULT_ENV.query

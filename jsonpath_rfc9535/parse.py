@@ -10,6 +10,7 @@ from typing import Dict
 from typing import Iterable
 from typing import List
 from typing import Optional
+from typing import Tuple
 
 from jsonpath_rfc9535.function_extensions.filter_function import ExpressionType
 from jsonpath_rfc9535.function_extensions.filter_function import FilterFunction
@@ -240,24 +241,24 @@ class Parser:
 
             stream.next_token()
 
-    def parse_selectors(self, stream: TokenStream) -> List[JSONPathSelector]:
+    def parse_selectors(self, stream: TokenStream) -> Tuple[JSONPathSelector, ...]:
         """Parse JSONPath selectors from a stream of tokens."""
         if stream.current.kind == TokenType.PROPERTY:
-            return [
+            return (
                 PropertySelector(
                     env=self.env,
                     token=stream.current,
                     name=stream.current.value,
-                )
-            ]
+                ),
+            )
 
         if stream.current.kind == TokenType.WILD:
-            return [WildSelector(env=self.env, token=stream.current)]
+            return (WildSelector(env=self.env, token=stream.current),)
 
         if stream.current.kind == TokenType.LBRACKET:
-            return self.parse_bracketed_selection(stream)
+            return tuple(self.parse_bracketed_selection(stream))
 
-        return []
+        return ()
 
     def parse_slice(self, stream: TokenStream) -> SliceSelector:
         """Parse a slice JSONPath expression from a stream of tokens."""
@@ -475,7 +476,7 @@ class Parser:
             token=root,
             path=JSONPath(
                 env=self.env,
-                segments=self.parse_path(stream, in_filter=True),
+                segments=tuple(self.parse_path(stream, in_filter=True)),
             ),
         )
 
@@ -484,7 +485,7 @@ class Parser:
         return CurrentPath(
             token=tok,
             path=JSONPath(
-                env=self.env, segments=self.parse_path(stream, in_filter=True)
+                env=self.env, segments=tuple(self.parse_path(stream, in_filter=True))
             ),
         )
 

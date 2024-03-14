@@ -18,7 +18,7 @@ class JSONPathNode:
 
     __slots__ = (
         "value",
-        "location",
+        "parts",
         "root",
     )
 
@@ -26,16 +26,28 @@ class JSONPathNode:
         self,
         *,
         value: object,
-        location: Tuple[Union[int, str], ...],
+        parts: Tuple[Union[int, str], ...],
         root: Union[Sequence[Any], Mapping[str, Any]],
     ) -> None:
         self.value: object = value
-        self.location: Tuple[Union[int, str], ...] = location
+        self.parts: Tuple[Union[int, str], ...] = parts
         self.root: Union[Sequence[Any], Mapping[str, Any]] = root
+
+    def path(self) -> str:
+        """Return the normalized path to this node."""
+        return "$" + "".join(
+            (f"['{p}']" if isinstance(p, str) else f"[{p}]" for p in self.parts)
+        )
+
+    def __str__(self) -> str:
+        return f"JSONPathNode({self.path()})"
 
 
 class JSONPathNodeList(List[JSONPathNode]):
-    """A list of JSONPathNode instances, with some helper methods."""
+    """A list JSONPathNode instances.
+
+    This is a `list` subclass with some helper methods.
+    """
 
     def values(self) -> List[object]:
         """Return the values from this node list."""

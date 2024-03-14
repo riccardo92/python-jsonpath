@@ -5,11 +5,14 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 from typing import Any
 from typing import Iterable
+from typing import List
 from typing import Mapping
 from typing import Sequence
+from typing import Tuple
 from typing import Union
 
 from .node import JSONPathNode
+from .node import JSONPathNodeList
 from .segments import JSONPathRecursiveDescentSegment
 from .selectors import IndexSelector
 from .selectors import PropertySelector
@@ -38,10 +41,10 @@ class JSONPath:
         self,
         *,
         env: JSONPathEnvironment,
-        segments: Iterable[JSONPathSegment],
+        segments: Tuple[JSONPathSegment, ...],
     ) -> None:
         self.env = env
-        self.segments = tuple(segments)
+        self.segments = segments
 
     def __str__(self) -> str:
         return "$" + "".join(str(segment) for segment in self.segments)
@@ -49,17 +52,17 @@ class JSONPath:
     def __hash__(self) -> int:
         return hash(self.segments)
 
-    def query(
+    def finditer(
         self,
-        data: Union[Sequence[Any], Mapping[str, Any]],
+        data: Union[Sequence[Any], Mapping[str, Any], str],
     ) -> Iterable[JSONPathNode]:
-        """Apply this JSONPath query to JSON-like data, _data_.
+        """Generate `JSONPathNode` instances for each match of this path in _data_.
 
         Arguments:
             data: A Python object implementing the `Sequence` or `Mapping` interfaces.
 
         Returns:
-            An iterator yielding `JSONPathMatch` objects for each match.
+            An iterator yielding `JSONPathNode` objects for each match.
 
         Raises:
             JSONPathSyntaxError: If the path is invalid.
@@ -69,7 +72,7 @@ class JSONPath:
         nodes: Iterable[JSONPathNode] = [
             JSONPathNode(
                 value=data,
-                location=(),
+                parts=(),
                 root=data,
             )
         ]
@@ -78,6 +81,44 @@ class JSONPath:
             nodes = segment.resolve(nodes)
 
         return nodes
+
+    def findall(
+        self,
+        data: Union[Sequence[Any], Mapping[str, Any], str],
+    ) -> List[object]:
+        """Find all values in _data_ matching this JSONPath.
+
+        Arguments:
+            data: A Python object implementing the `Sequence` or `Mapping` interfaces.
+
+        Returns:
+            A list of matched values. If there are no matches, the list will be empty.
+
+        Raises:
+            JSONPathSyntaxError: If the path is invalid.
+            JSONPathTypeError: If a filter expression attempts to use types in
+                an incompatible way.
+        """
+        return [node.value for node in self.finditer(data)]
+
+    def query(
+        self,
+        data: Union[Sequence[Any], Mapping[str, Any], str],
+    ) -> JSONPathNodeList:
+        """Apply this JSONPath query to JSON-like _data_ and return a node list.
+
+        Arguments:
+            data: A Python object implementing the `Sequence` or `Mapping` interfaces.
+
+        Returns:
+            A list of `JSONPathNode` instance.
+
+        Raises:
+            JSONPathSyntaxError: If the path is invalid.
+            JSONPathTypeError: If a filter expression attempts to use types in
+                an incompatible way.
+        """
+        return JSONPathNodeList(self.finditer(data))
 
     def singular_query(self) -> bool:
         """Return `True` if this JSONPath query is a singular query."""
