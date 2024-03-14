@@ -8,6 +8,7 @@ import json
 import operator
 from dataclasses import dataclass
 from typing import Any
+from typing import Dict
 from typing import List
 from typing import Mapping
 from typing import Optional
@@ -29,12 +30,7 @@ class Case:
     invalid_selector: Optional[bool] = None
 
 
-SKIP = {
-    "functions, match, filter, match function, unicode char class, uppercase": "\\p not supported",  # noqa: E501
-    "functions, match, filter, match function, unicode char class negated, uppercase": "\\P not supported",  # noqa: E501
-    "functions, search, filter, search function, unicode char class, uppercase": "\\p not supported",  # noqa: E501
-    "functions, search, filter, search function, unicode char class negated, uppercase": "\\P not supported",  # noqa: E501
-}
+SKIP: Dict[str, str] = {}
 
 
 def cases() -> List[Case]:

@@ -1,6 +1,6 @@
 """The standard `match` function extension."""
 
-import re
+import regex as re
 
 from jsonpath.function_extensions import ExpressionType
 from jsonpath.function_extensions import FilterFunction
