@@ -139,13 +139,6 @@ class Parser:
         ]
     )
 
-    RE_FLAG_MAP = {
-        "a": re.A,
-        "i": re.I,
-        "m": re.M,
-        "s": re.S,
-    }
-
     _INVALID_NAME_SELECTOR_CHARS = f"[{''.join(INVALID_NAME_SELECTOR_CHARS)}]"
     RE_INVALID_NAME_SELECTOR = re.compile(
         rf'(?:(?!(?<!\\)"){_INVALID_NAME_SELECTOR_CHARS})'
