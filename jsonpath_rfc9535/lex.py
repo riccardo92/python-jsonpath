@@ -100,7 +100,6 @@ class Lexer:
 
     def peek(self) -> str:
         """Return the next character without advancing the pointer."""
-        # TODO: or try self.path[self.pos+1]
         c = self.next()
         if c:
             self.backup()
@@ -162,7 +161,6 @@ def lex_root(l: Lexer) -> Optional[StateFn]:  # noqa: D103
 def lex_segment(l: Lexer) -> Optional[StateFn]:  # noqa: D103
     if l.ignore_whitespace() and not l.peek():
         l.error("unexpected trailing whitespace")
-        # TODO: return None
 
     c = l.next()
 

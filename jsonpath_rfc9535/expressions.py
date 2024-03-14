@@ -306,7 +306,7 @@ class FunctionExtension(Expression):
         try:
             func = context.env.function_extensions[self.name]
         except KeyError:
-            return NOTHING  # TODO: should probably raise an exception
+            return NOTHING
         args = [arg.evaluate(context) for arg in self.args]
         return func(*self._unpack_node_lists(func, args))
 

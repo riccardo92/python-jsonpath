@@ -378,7 +378,6 @@ class Parser:
                 )
 
             if stream.peek.kind != TokenType.RBRACKET:
-                # TODO: error message .. expected a comma or logical operator
                 stream.expect_peek(TokenType.COMMA)
                 stream.next_token()
 
@@ -432,7 +431,7 @@ class Parser:
 
     def parse_prefix_expression(self, stream: TokenStream) -> Expression:
         tok = stream.next_token()
-        assert tok.kind == TokenType.NOT  # TODO:
+        assert tok.kind == TokenType.NOT
         return PrefixExpression(
             tok,
             operator="!",
@@ -471,7 +470,7 @@ class Parser:
 
     def parse_root_path(self, stream: TokenStream) -> Expression:
         root = stream.next_token()
-        assert root.kind == TokenType.ROOT  # TODO:
+        assert root.kind == TokenType.ROOT
         return RootPath(
             token=root,
             path=JSONPath(

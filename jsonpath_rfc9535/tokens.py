@@ -24,7 +24,6 @@ class TokenType(Enum):
     COLON = auto()
     COMMA = auto()
     DOT = auto()
-    DOT_PROPERTY = auto()  # TODO: do we need this?
     DOUBLE_DOT = auto()
     FILTER = auto()
     INDEX = auto()
