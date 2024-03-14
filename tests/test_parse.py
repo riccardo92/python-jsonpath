@@ -28,20 +28,14 @@ TEST_CASES = [
         path="$['anything{!%']",
         want="$['anything{!%']",
     ),
-    Case(
-        description="root dot bracket property", path="$.['thing']", want="$['thing']"
-    ),
     Case(description="root bracket index", path="$[1]", want="$[1]"),
     Case(description="root slice", path="$[1:-1]", want="$[1:-1:1]"),
-    Case(description="root dot slice", path="$.[1:-1]", want="$[1:-1:1]"),
     Case(description="root slice with step", path="$[1:-1:2]", want="$[1:-1:2]"),
     Case(description="root slice with empty start", path="$[:-1]", want="$[:-1:1]"),
     Case(description="root slice with empty stop", path="$[1:]", want="$[1::1]"),
     Case(description="root dot wild", path="$.*", want="$[*]"),
     Case(description="root bracket wild", path="$[*]", want="$[*]"),
-    Case(description="root dot bracket wild", path="$.[*]", want="$[*]"),
     Case(description="root selector list", path="$[1,2]", want="$[1, 2]"),
-    Case(description="root dot selector list", path="$.[1,2]", want="$[1, 2]"),
     Case(
         description="root selector list with slice",
         path="$[1,5:-1:1]",

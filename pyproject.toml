@@ -173,3 +173,4 @@ convention = "google"
 "jsonpath/__about__.py" = ["D100"]
 "jsonpath/__init__.py" = ["D104"]
 "tests/*" = ["D100", "D101", "D104", "D103"]
+"jsonpath/lex.py" = ["E741"]

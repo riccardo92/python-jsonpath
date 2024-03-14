@@ -10,6 +10,7 @@ from typing import Sequence
 from typing import Union
 
 from .node import JSONPathNode
+from .segments import JSONPathRecursiveDescentSegment
 from .selectors import IndexSelector
 from .selectors import PropertySelector
 
@@ -81,11 +82,16 @@ class JSONPath:
     def singular_query(self) -> bool:
         """Return `True` if this JSONPath query is a singular query."""
         for segment in self.segments:
+            if isinstance(segment, JSONPathRecursiveDescentSegment):
+                return False
+
             if len(segment.selectors) == 1 and isinstance(
                 segment.selectors[0], (PropertySelector, IndexSelector)
             ):
                 continue
+
             return False
+
         return True
 
     def empty(self) -> bool:

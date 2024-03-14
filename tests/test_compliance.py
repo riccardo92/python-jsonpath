@@ -30,22 +30,10 @@ class Case:
 
 
 SKIP = {
-    # "basic, no leading whitespace": "flexible whitespace policy",
-    # "basic, no trailing whitespace": "flexible whitespace policy",
-    # "basic, bald descendant segment": "almost has a consensus",
     "functions, match, filter, match function, unicode char class, uppercase": "\\p not supported",  # noqa: E501
     "functions, match, filter, match function, unicode char class negated, uppercase": "\\P not supported",  # noqa: E501
     "functions, search, filter, search function, unicode char class, uppercase": "\\p not supported",  # noqa: E501
     "functions, search, filter, search function, unicode char class negated, uppercase": "\\P not supported",  # noqa: E501
-    # "filter, equals number, decimal fraction, no fractional digit": "TODO",
-    # "whitespace, selectors, space between dot and name": "flexible whitespace policy",  # noqa: E501
-    # "whitespace, selectors, newline between dot and name": "flexible whitespace policy",  # noqa: E501
-    # "whitespace, selectors, tab between dot and name": "flexible whitespace policy",  # noqa: E501
-    # "whitespace, selectors, return between dot and name": "flexible whitespace policy",  # noqa: E501
-    # "whitespace, selectors, space between recursive descent and name": "flexible whitespace policy",  # noqa: E501
-    # "whitespace, selectors, newline between recursive descent and name": "flexible whitespace policy",  # noqa: E501
-    # "whitespace, selectors, tab between recursive descent and name": "flexible whitespace policy",  # noqa: E501
-    # "whitespace, selectors, return between recursive descent and name": "flexible whitespace policy",  # noqa: E501
 }
 
 

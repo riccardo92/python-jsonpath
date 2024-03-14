@@ -75,3 +75,16 @@ class JSONPathNameError(JSONPathError):
     def __init__(self, *args: object, token: Token) -> None:
         super().__init__(*args)
         self.token = token
+
+
+class JSONPathLexerError(JSONPathError):
+    """An exception raised from inside the lexer.
+
+    Arguments:
+        args: Arguments passed to `Exception`.
+        token: The token that caused the error.
+    """
+
+    def __init__(self, *args: object, token: Token) -> None:
+        super().__init__(*args)
+        self.token = token

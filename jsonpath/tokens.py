@@ -6,6 +6,7 @@ from collections import deque
 from enum import Enum
 from enum import auto
 from typing import Deque
+from typing import Iterable
 from typing import Iterator
 from typing import Tuple
 
@@ -16,7 +17,7 @@ class TokenType(Enum):
     """JSONPath query token types."""
 
     EOF = auto()
-    ILLEGAL = auto()
+    ERROR = auto()
     SKIP = auto()
 
     SHORTHAND_PROPERTY = auto()
@@ -114,8 +115,8 @@ class Token:
 class TokenStream:
     """Step through or iterate a stream of tokens."""
 
-    def __init__(self, token_iter: Iterator[Token]):
-        self.iter = token_iter
+    def __init__(self, token_iter: Iterable[Token]):
+        self.iter = iter(token_iter)
         self._pushed: Deque[Token] = deque()
         self.current = Token(TokenType.SKIP, "", -1, "")
         next(self)

@@ -27,7 +27,7 @@ from .expressions import LogicalExpression
 from .expressions import Path
 from .function_extensions import ExpressionType
 from .function_extensions import FilterFunction
-from .lex import Lexer
+from .lex import tokenize
 from .parse import Parser
 from .path import JSONPath
 from .tokens import TokenStream
@@ -41,16 +41,12 @@ if TYPE_CHECKING:
 class JSONPathEnvironment:
     """JSONPath configuration."""
 
-    lexer_class: Type[Lexer] = Lexer
     parser_class: Type[Parser] = Parser
 
     max_int_index = (2**53) - 1
     min_int_index = -(2**53) + 1
 
     def __init__(self) -> None:
-        self.lexer: Lexer = self.lexer_class(env=self)
-        """The lexer bound to this environment."""
-
         self.parser: Parser = self.parser_class(env=self)
         """The parser bound to this environment."""
 
@@ -73,7 +69,7 @@ class JSONPathEnvironment:
             JSONPathTypeError: If filter functions are given arguments of an
                 unacceptable type.
         """
-        tokens = self.lexer.tokenize(path)
+        tokens = tokenize(path)
         stream = TokenStream(tokens)
         return JSONPath(env=self, segments=self.parser.parse(stream))
 

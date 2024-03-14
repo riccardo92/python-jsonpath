@@ -261,30 +261,48 @@ class Parser:
 
     def parse_slice(self, stream: TokenStream) -> SliceSelector:
         """Parse a slice JSONPath expression from a stream of tokens."""
-        start_token = stream.next_token()
-        stream.expect(TokenType.SLICE_STOP)
-        stop_token = stream.next_token()
-        stream.expect(TokenType.SLICE_STEP)
-        step_token = stream.current
+        tok = stream.current
+        start: Optional[int] = None
+        stop: Optional[int] = None
+        step: Optional[int] = None
 
-        if not start_token.value:
-            start: Optional[int] = None
-        else:
-            start = int(start_token.value)
+        def _maybe_index(token: Token) -> bool:
+            if token.kind == TokenType.INDEX:
+                if len(token.value) > 1 and token.value.startswith(("0", "-0")):
+                    raise JSONPathSyntaxError(
+                        f"invalid index {token.value!r}", token=token
+                    )
+                return True
+            return False
 
-        if not stop_token.value:
-            stop: Optional[int] = None
-        else:
-            stop = int(stop_token.value)
+        # 1: or :
+        if _maybe_index(stream.current):
+            start = int(stream.current.value)
+            stream.next_token()
 
-        if not step_token.value:
-            step: Optional[int] = None
-        else:
-            step = int(step_token.value)
+        stream.expect(TokenType.COLON)
+        stream.next_token()
+
+        # 1 or 1: or : or ?
+        if _maybe_index(stream.current):
+            stop = int(stream.current.value)
+            stream.next_token()
+            if stream.current.kind == TokenType.COLON:
+                stream.next_token()
+        elif stream.current.kind == TokenType.COLON:
+            stream.expect(TokenType.COLON)
+            stream.next_token()
+
+        # // 1 or ?
+        if _maybe_index(stream.current):
+            step = int(stream.current.value)
+            stream.next_token()
+
+        stream.push(stream.current)
 
         return SliceSelector(
             env=self.env,
-            token=start_token,
+            token=tok,
             start=start,
             stop=stop,
             step=step,
@@ -296,21 +314,24 @@ class Parser:
         selectors: List[JSONPathSelector] = []
 
         while stream.current.kind != TokenType.RBRACKET:
-            if stream.current.kind == TokenType.INT:
-                if (
-                    len(stream.current.value) > 1
-                    and stream.current.value.startswith("0")
-                ) or stream.current.value.startswith("-0"):
-                    raise JSONPathSyntaxError(
-                        "leading zero in index selector", token=stream.current
+            if stream.current.kind == TokenType.INDEX:
+                if stream.peek.kind == TokenType.COLON:
+                    selectors.append(self.parse_slice(stream))
+                else:
+                    if (
+                        len(stream.current.value) > 1
+                        and stream.current.value.startswith("0")
+                    ) or stream.current.value.startswith("-0"):
+                        raise JSONPathSyntaxError(
+                            "leading zero in index selector", token=stream.current
+                        )
+                    selectors.append(
+                        IndexSelector(
+                            env=self.env,
+                            token=stream.current,
+                            index=int(stream.current.value),
+                        )
                     )
-                selectors.append(
-                    IndexSelector(
-                        env=self.env,
-                        token=stream.current,
-                        index=int(stream.current.value),
-                    )
-                )
             elif stream.current.kind in (
                 TokenType.DOUBLE_QUOTE_STRING,
                 TokenType.SINGLE_QUOTE_STRING,
@@ -328,7 +349,7 @@ class Parser:
                         name=self._decode_string_literal(stream.current),
                     ),
                 )
-            elif stream.current.kind == TokenType.SLICE_START:
+            elif stream.current.kind == TokenType.COLON:
                 selectors.append(self.parse_slice(stream))
             elif stream.current.kind == TokenType.WILD:
                 selectors.append(

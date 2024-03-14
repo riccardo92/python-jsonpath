@@ -4,8 +4,7 @@ from typing import List
 
 import pytest
 
-from jsonpath import JSONPathEnvironment
-from jsonpath.exceptions import JSONPathSyntaxError
+from jsonpath.lex import lex
 from jsonpath.tokens import Token
 from jsonpath.tokens import TokenType
 
@@ -19,844 +18,460 @@ class Case:
 
 TEST_CASES = [
     Case(
-        description="just root",
-        path="$",
+        description="basic shorthand name",
+        path="$.foo.bar",
         want=[
-            Token(kind=TokenType.ROOT, value="$", index=0, path="$"),
+            Token(TokenType.ROOT, "$", 0, "$.foo.bar"),
+            Token(TokenType.PROPERTY, "foo", 2, "$.foo.bar"),
+            Token(TokenType.PROPERTY, "bar", 6, "$.foo.bar"),
+            Token(TokenType.EOF, "", 9, "$.foo.bar"),
         ],
     ),
     Case(
-        description="root dot property",
-        path="$.some.thing",
+        description="bracketed name",
+        path="$['foo']['bar']",
         want=[
-            Token(kind=TokenType.ROOT, value="$", index=0, path="$.some.thing"),
-            Token(kind=TokenType.PROPERTY, value="some", index=2, path="$.some.thing"),
-            Token(kind=TokenType.PROPERTY, value="thing", index=7, path="$.some.thing"),
+            Token(TokenType.ROOT, "$", 0, "$['foo']['bar']"),
+            Token(TokenType.LBRACKET, "[", 1, "$['foo']['bar']"),
+            Token(TokenType.SINGLE_QUOTE_STRING, "foo", 3, "$['foo']['bar']"),
+            Token(TokenType.RBRACKET, "]", 7, "$['foo']['bar']"),
+            Token(TokenType.LBRACKET, "[", 8, "$['foo']['bar']"),
+            Token(TokenType.SINGLE_QUOTE_STRING, "bar", 10, "$['foo']['bar']"),
+            Token(TokenType.RBRACKET, "]", 14, "$['foo']['bar']"),
+            Token(TokenType.EOF, "", 15, "$['foo']['bar']"),
         ],
     ),
     Case(
-        description="root double quoted property",
-        path='$["some"]',
+        description="basic index",
+        path="$.foo[1]",
         want=[
-            Token(kind=TokenType.ROOT, value="$", index=0, path='$["some"]'),
-            Token(kind=TokenType.LBRACKET, value="[", index=1, path='$["some"]'),
+            Token(TokenType.ROOT, "$", 0, "$.foo[1]"),
+            Token(TokenType.PROPERTY, "foo", 2, "$.foo[1]"),
+            Token(TokenType.LBRACKET, "[", 5, "$.foo[1]"),
+            Token(TokenType.INDEX, "1", 6, "$.foo[1]"),
+            Token(TokenType.RBRACKET, "]", 7, "$.foo[1]"),
+            Token(TokenType.EOF, "", 8, "$.foo[1]"),
+        ],
+    ),
+    Case(
+        description="missing root selector",
+        path="foo.bar",
+        want=[
+            Token(TokenType.ERROR, "expected '$', found 'f'", 0, "foo.bar"),
+        ],
+    ),
+    Case(
+        description="root property selector without dot",
+        path="$foo",
+        want=[
+            Token(TokenType.ROOT, "$", 0, "$foo"),
             Token(
-                kind=TokenType.DOUBLE_QUOTE_STRING,
-                value="some",
-                index=3,
-                path='$["some"]',
-            ),
-            Token(kind=TokenType.RBRACKET, value="]", index=8, path='$["some"]'),
-        ],
-    ),
-    Case(
-        description="root single quoted property",
-        path="$['some']",
-        want=[
-            Token(kind=TokenType.ROOT, value="$", index=0, path="$['some']"),
-            Token(kind=TokenType.LBRACKET, value="[", index=1, path="$['some']"),
-            Token(
-                kind=TokenType.SINGLE_QUOTE_STRING,
-                value="some",
-                index=3,
-                path="$['some']",
-            ),
-            Token(kind=TokenType.RBRACKET, value="]", index=8, path="$['some']"),
-        ],
-    ),
-    Case(
-        description="root bracket index",
-        path="$[1]",
-        want=[
-            Token(kind=TokenType.ROOT, value="$", index=0, path="$[1]"),
-            Token(kind=TokenType.LBRACKET, value="[", index=1, path="$[1]"),
-            Token(kind=TokenType.INT, value="1", index=2, path="$[1]"),
-            Token(kind=TokenType.RBRACKET, value="]", index=3, path="$[1]"),
-        ],
-    ),
-    Case(
-        description="root dot bracket index",  # XXX
-        path="$.[1]",
-        want=[
-            Token(kind=TokenType.ROOT, value="$", index=0, path="$.[1]"),
-            Token(kind=TokenType.LBRACKET, value="[", index=2, path="$.[1]"),
-            Token(kind=TokenType.INT, value="1", index=3, path="$.[1]"),
-            Token(kind=TokenType.RBRACKET, value="]", index=4, path="$.[1]"),
-        ],
-    ),
-    Case(
-        description="empty slice",
-        path="[:]",
-        want=[
-            Token(kind=TokenType.LBRACKET, value="[", index=0, path="[:]"),
-            Token(kind=TokenType.SLICE_START, value="", index=1, path="[:]"),
-            Token(kind=TokenType.SLICE_STOP, value="", index=2, path="[:]"),
-            Token(kind=TokenType.SLICE_STEP, value="", index=-1, path="[:]"),
-            Token(kind=TokenType.RBRACKET, value="]", index=2, path="[:]"),
-        ],
-    ),
-    Case(
-        description="empty slice empty step",
-        path="[::]",
-        want=[
-            Token(kind=TokenType.LBRACKET, value="[", index=0, path="[::]"),
-            Token(kind=TokenType.SLICE_START, value="", index=1, path="[::]"),
-            Token(kind=TokenType.SLICE_STOP, value="", index=2, path="[::]"),
-            Token(kind=TokenType.SLICE_STEP, value="", index=3, path="[::]"),
-            Token(kind=TokenType.RBRACKET, value="]", index=3, path="[::]"),
-        ],
-    ),
-    Case(
-        description="slice empty stop",
-        path="[1:]",
-        want=[
-            Token(kind=TokenType.LBRACKET, value="[", index=0, path="[1:]"),
-            Token(kind=TokenType.SLICE_START, value="1", index=1, path="[1:]"),
-            Token(kind=TokenType.SLICE_STOP, value="", index=3, path="[1:]"),
-            Token(kind=TokenType.SLICE_STEP, value="", index=-1, path="[1:]"),
-            Token(kind=TokenType.RBRACKET, value="]", index=3, path="[1:]"),
-        ],
-    ),
-    Case(
-        description="slice empty start",
-        path="[:-1]",
-        want=[
-            Token(kind=TokenType.LBRACKET, value="[", index=0, path="[:-1]"),
-            Token(kind=TokenType.SLICE_START, value="", index=1, path="[:-1]"),
-            Token(kind=TokenType.SLICE_STOP, value="-1", index=2, path="[:-1]"),
-            Token(kind=TokenType.SLICE_STEP, value="", index=-1, path="[:-1]"),
-            Token(kind=TokenType.RBRACKET, value="]", index=4, path="[:-1]"),
-        ],
-    ),
-    Case(
-        description="slice start and stop",
-        path="[1:7]",
-        want=[
-            Token(kind=TokenType.LBRACKET, value="[", index=0, path="[1:7]"),
-            Token(kind=TokenType.SLICE_START, value="1", index=1, path="[1:7]"),
-            Token(kind=TokenType.SLICE_STOP, value="7", index=3, path="[1:7]"),
-            Token(kind=TokenType.SLICE_STEP, value="", index=-1, path="[1:7]"),
-            Token(kind=TokenType.RBRACKET, value="]", index=4, path="[1:7]"),
-        ],
-    ),
-    Case(
-        description="slice start, stop and step",
-        path="[1:7:2]",
-        want=[
-            Token(kind=TokenType.LBRACKET, value="[", index=0, path="[1:7:2]"),
-            Token(kind=TokenType.SLICE_START, value="1", index=1, path="[1:7:2]"),
-            Token(kind=TokenType.SLICE_STOP, value="7", index=3, path="[1:7:2]"),
-            Token(kind=TokenType.SLICE_STEP, value="2", index=5, path="[1:7:2]"),
-            Token(kind=TokenType.RBRACKET, value="]", index=6, path="[1:7:2]"),
-        ],
-    ),
-    Case(
-        description="root dot wild",
-        path="$.*",
-        want=[
-            Token(kind=TokenType.ROOT, value="$", index=0, path="$.*"),
-            Token(kind=TokenType.WILD, value="*", index=2, path="$.*"),
-        ],
-    ),
-    Case(
-        description="root bracket wild",
-        path="$[*]",
-        want=[
-            Token(kind=TokenType.ROOT, value="$", index=0, path="$[*]"),
-            Token(kind=TokenType.LBRACKET, value="[", index=1, path="$[*]"),
-            Token(kind=TokenType.WILD, value="*", index=2, path="$[*]"),
-            Token(kind=TokenType.RBRACKET, value="]", index=3, path="$[*]"),
-        ],
-    ),
-    Case(
-        description="root dot bracket wild",
-        path="$.[*]",
-        want=[
-            Token(kind=TokenType.ROOT, value="$", index=0, path="$.[*]"),
-            Token(kind=TokenType.LBRACKET, value="[", index=2, path="$.[*]"),
-            Token(kind=TokenType.WILD, value="*", index=3, path="$.[*]"),
-            Token(kind=TokenType.RBRACKET, value="]", index=4, path="$.[*]"),
-        ],
-    ),
-    Case(
-        description="root descend property",
-        path="$..thing",
-        want=[
-            Token(kind=TokenType.ROOT, value="$", index=0, path="$..thing"),
-            Token(kind=TokenType.DOUBLE_DOT, value="..", index=1, path="$..thing"),
-            Token(kind=TokenType.PROPERTY, value="thing", index=3, path="$..thing"),
-        ],
-    ),
-    Case(
-        description="root selector list of indices",
-        path="$[1,4,5]",
-        want=[
-            Token(kind=TokenType.ROOT, value="$", index=0, path="$[1,4,5]"),
-            Token(kind=TokenType.LBRACKET, value="[", index=1, path="$[1,4,5]"),
-            Token(kind=TokenType.INT, value="1", index=2, path="$[1,4,5]"),
-            Token(kind=TokenType.COMMA, value=",", index=3, path="$[1,4,5]"),
-            Token(kind=TokenType.INT, value="4", index=4, path="$[1,4,5]"),
-            Token(kind=TokenType.COMMA, value=",", index=5, path="$[1,4,5]"),
-            Token(kind=TokenType.INT, value="5", index=6, path="$[1,4,5]"),
-            Token(kind=TokenType.RBRACKET, value="]", index=7, path="$[1,4,5]"),
-        ],
-    ),
-    Case(
-        description="root selector list with a slice",
-        path="$[1,4:9]",
-        want=[
-            Token(kind=TokenType.ROOT, value="$", index=0, path="$[1,4:9]"),
-            Token(kind=TokenType.LBRACKET, value="[", index=1, path="$[1,4:9]"),
-            Token(kind=TokenType.INT, value="1", index=2, path="$[1,4:9]"),
-            Token(kind=TokenType.COMMA, value=",", index=3, path="$[1,4:9]"),
-            Token(kind=TokenType.SLICE_START, value="4", index=4, path="$[1,4:9]"),
-            Token(kind=TokenType.SLICE_STOP, value="9", index=6, path="$[1,4:9]"),
-            Token(kind=TokenType.SLICE_STEP, value="", index=-1, path="$[1,4:9]"),
-            Token(kind=TokenType.RBRACKET, value="]", index=7, path="$[1,4:9]"),
-        ],
-    ),
-    Case(
-        description="root dot filter on self dot property",
-        path="$.[?(@.some)]",
-        want=[
-            Token(kind=TokenType.ROOT, value="$", index=0, path="$.[?(@.some)]"),
-            Token(kind=TokenType.LBRACKET, value="[", index=2, path="$.[?(@.some)]"),
-            Token(kind=TokenType.FILTER, value="?", index=3, path="$.[?(@.some)]"),
-            Token(kind=TokenType.LPAREN, value="(", index=4, path="$.[?(@.some)]"),
-            Token(kind=TokenType.CURRENT, value="@", index=5, path="$.[?(@.some)]"),
-            Token(kind=TokenType.PROPERTY, value="some", index=7, path="$.[?(@.some)]"),
-            Token(kind=TokenType.RPAREN, value=")", index=11, path="$.[?(@.some)]"),
-            Token(kind=TokenType.RBRACKET, value="]", index=12, path="$.[?(@.some)]"),
-        ],
-    ),
-    Case(
-        description="root dot filter on root dot property",
-        path="$.[?($.some)]",
-        want=[
-            Token(kind=TokenType.ROOT, value="$", index=0, path="$.[?($.some)]"),
-            Token(kind=TokenType.LBRACKET, value="[", index=2, path="$.[?($.some)]"),
-            Token(kind=TokenType.FILTER, value="?", index=3, path="$.[?($.some)]"),
-            Token(kind=TokenType.LPAREN, value="(", index=4, path="$.[?($.some)]"),
-            Token(kind=TokenType.ROOT, value="$", index=5, path="$.[?($.some)]"),
-            Token(kind=TokenType.PROPERTY, value="some", index=7, path="$.[?($.some)]"),
-            Token(kind=TokenType.RPAREN, value=")", index=11, path="$.[?($.some)]"),
-            Token(kind=TokenType.RBRACKET, value="]", index=12, path="$.[?($.some)]"),
-        ],
-    ),
-    Case(
-        description="root dot filter on self index",
-        path="$.[?(@[1])]",
-        want=[
-            Token(kind=TokenType.ROOT, value="$", index=0, path="$.[?(@[1])]"),
-            Token(kind=TokenType.LBRACKET, value="[", index=2, path="$.[?(@[1])]"),
-            Token(kind=TokenType.FILTER, value="?", index=3, path="$.[?(@[1])]"),
-            Token(kind=TokenType.LPAREN, value="(", index=4, path="$.[?(@[1])]"),
-            Token(kind=TokenType.CURRENT, value="@", index=5, path="$.[?(@[1])]"),
-            Token(kind=TokenType.LBRACKET, value="[", index=6, path="$.[?(@[1])]"),
-            Token(kind=TokenType.INT, value="1", index=7, path="$.[?(@[1])]"),
-            Token(kind=TokenType.RBRACKET, value="]", index=8, path="$.[?(@[1])]"),
-            Token(kind=TokenType.RPAREN, value=")", index=9, path="$.[?(@[1])]"),
-            Token(kind=TokenType.RBRACKET, value="]", index=10, path="$.[?(@[1])]"),
-        ],
-    ),
-    Case(
-        description="filter self dot property equality with float",
-        path="[?(@.some == 1.1)]",
-        want=[
-            Token(
-                kind=TokenType.LBRACKET, value="[", index=0, path="[?(@.some == 1.1)]"
-            ),
-            Token(kind=TokenType.FILTER, value="?", index=1, path="[?(@.some == 1.1)]"),
-            Token(kind=TokenType.LPAREN, value="(", index=2, path="[?(@.some == 1.1)]"),
-            Token(
-                kind=TokenType.CURRENT, value="@", index=3, path="[?(@.some == 1.1)]"
-            ),
-            Token(
-                kind=TokenType.PROPERTY,
-                value="some",
-                index=5,
-                path="[?(@.some == 1.1)]",
-            ),
-            Token(kind=TokenType.EQ, value="==", index=10, path="[?(@.some == 1.1)]"),
-            Token(
-                kind=TokenType.FLOAT, value="1.1", index=13, path="[?(@.some == 1.1)]"
-            ),
-            Token(
-                kind=TokenType.RPAREN, value=")", index=16, path="[?(@.some == 1.1)]"
-            ),
-            Token(
-                kind=TokenType.RBRACKET, value="]", index=17, path="[?(@.some == 1.1)]"
+                TokenType.ERROR,
+                "expected '.', '..' or a bracketed selection, found 'f'",
+                1,
+                "$foo",
             ),
         ],
     ),
     Case(
-        description=(
-            "filter self dot property equality with float in scientific notation"
-        ),
-        path="[?(@.some == 1.1e10)]",
+        description="whitespace after root",
+        path="$ .foo.bar",
         want=[
+            Token(TokenType.ROOT, "$", 0, "$ .foo.bar"),
+            Token(TokenType.PROPERTY, "foo", 3, "$ .foo.bar"),
+            Token(TokenType.PROPERTY, "bar", 7, "$ .foo.bar"),
+            Token(TokenType.EOF, "", 10, "$ .foo.bar"),
+        ],
+    ),
+    Case(
+        description="whitespace before dot property",
+        path="$. foo.bar",
+        want=[
+            Token(TokenType.ROOT, "$", 0, "$. foo.bar"),
+            Token(TokenType.ERROR, "unexpected whitespace after dot", 3, "$. foo.bar"),
+        ],
+    ),
+    Case(
+        description="whitespace after dot property",
+        path="$.foo .bar",
+        want=[
+            Token(TokenType.ROOT, "$", 0, "$.foo .bar"),
+            Token(TokenType.PROPERTY, "foo", 2, "$.foo .bar"),
+            Token(TokenType.PROPERTY, "bar", 7, "$.foo .bar"),
+            Token(TokenType.EOF, "", 10, "$.foo .bar"),
+        ],
+    ),
+    Case(
+        description="basic dot wild",
+        path="$.foo.*",
+        want=[
+            Token(TokenType.ROOT, "$", 0, "$.foo.*"),
+            Token(TokenType.PROPERTY, "foo", 2, "$.foo.*"),
+            Token(TokenType.WILD, "*", 6, "$.foo.*"),
+            Token(TokenType.EOF, "", 7, "$.foo.*"),
+        ],
+    ),
+    Case(
+        description="basic recurse",
+        path="$..foo",
+        want=[
+            Token(TokenType.ROOT, "$", 0, "$..foo"),
+            Token(TokenType.DOUBLE_DOT, "..", 1, "$..foo"),
+            Token(TokenType.PROPERTY, "foo", 3, "$..foo"),
+            Token(TokenType.EOF, "", 6, "$..foo"),
+        ],
+    ),
+    Case(
+        description="basic recurse with trailing dot",
+        path="$...foo",
+        want=[
+            Token(TokenType.ROOT, "$", 0, "$...foo"),
+            Token(TokenType.DOUBLE_DOT, "..", 1, "$...foo"),
             Token(
-                kind=TokenType.LBRACKET,
-                value="[",
-                index=0,
-                path="[?(@.some == 1.1e10)]",
-            ),
-            Token(
-                kind=TokenType.FILTER, value="?", index=1, path="[?(@.some == 1.1e10)]"
-            ),
-            Token(
-                kind=TokenType.LPAREN,
-                value="(",
-                index=2,
-                path="[?(@.some == 1.1e10)]",
-            ),
-            Token(
-                kind=TokenType.CURRENT, value="@", index=3, path="[?(@.some == 1.1e10)]"
-            ),
-            Token(
-                kind=TokenType.PROPERTY,
-                value="some",
-                index=5,
-                path="[?(@.some == 1.1e10)]",
-            ),
-            Token(
-                kind=TokenType.EQ, value="==", index=10, path="[?(@.some == 1.1e10)]"
-            ),
-            Token(
-                kind=TokenType.FLOAT,
-                value="1.1e10",
-                index=13,
-                path="[?(@.some == 1.1e10)]",
-            ),
-            Token(
-                kind=TokenType.RPAREN, value=")", index=19, path="[?(@.some == 1.1e10)]"
-            ),
-            Token(
-                kind=TokenType.RBRACKET,
-                value="]",
-                index=20,
-                path="[?(@.some == 1.1e10)]",
+                TokenType.ERROR,
+                "unexpected descendant selection token '.'",
+                3,
+                "$...foo",
             ),
         ],
     ),
     Case(
-        description="filter self index equality with float",
-        path="[?(@[1] == 1.1)]",
+        description="erroneous double recurse",
+        path="$....foo",
         want=[
-            Token(kind=TokenType.LBRACKET, value="[", index=0, path="[?(@[1] == 1.1)]"),
-            Token(kind=TokenType.FILTER, value="?", index=1, path="[?(@[1] == 1.1)]"),
-            Token(kind=TokenType.LPAREN, value="(", index=2, path="[?(@[1] == 1.1)]"),
-            Token(kind=TokenType.CURRENT, value="@", index=3, path="[?(@[1] == 1.1)]"),
-            Token(kind=TokenType.LBRACKET, value="[", index=4, path="[?(@[1] == 1.1)]"),
-            Token(kind=TokenType.INT, value="1", index=5, path="[?(@[1] == 1.1)]"),
-            Token(kind=TokenType.RBRACKET, value="]", index=6, path="[?(@[1] == 1.1)]"),
-            Token(kind=TokenType.EQ, value="==", index=8, path="[?(@[1] == 1.1)]"),
-            Token(kind=TokenType.FLOAT, value="1.1", index=11, path="[?(@[1] == 1.1)]"),
-            Token(kind=TokenType.RPAREN, value=")", index=14, path="[?(@[1] == 1.1)]"),
+            Token(TokenType.ROOT, "$", 0, "$....foo"),
+            Token(TokenType.DOUBLE_DOT, "..", 1, "$....foo"),
             Token(
-                kind=TokenType.RBRACKET, value="]", index=15, path="[?(@[1] == 1.1)]"
+                TokenType.ERROR,
+                "unexpected descendant selection token '.'",
+                3,
+                "$....foo",
             ),
         ],
     ),
     Case(
-        description="filter self dot property equality with int",
-        path="[?(@.some == 1)]",
+        description="bracketed name selector, double quotes",
+        path='$.foo["bar"]',
         want=[
-            Token(kind=TokenType.LBRACKET, value="[", index=0, path="[?(@.some == 1)]"),
-            Token(kind=TokenType.FILTER, value="?", index=1, path="[?(@.some == 1)]"),
-            Token(kind=TokenType.LPAREN, value="(", index=2, path="[?(@.some == 1)]"),
-            Token(kind=TokenType.CURRENT, value="@", index=3, path="[?(@.some == 1)]"),
-            Token(
-                kind=TokenType.PROPERTY, value="some", index=5, path="[?(@.some == 1)]"
-            ),
-            Token(kind=TokenType.EQ, value="==", index=10, path="[?(@.some == 1)]"),
-            Token(kind=TokenType.INT, value="1", index=13, path="[?(@.some == 1)]"),
-            Token(kind=TokenType.RPAREN, value=")", index=14, path="[?(@.some == 1)]"),
-            Token(
-                kind=TokenType.RBRACKET, value="]", index=15, path="[?(@.some == 1)]"
-            ),
+            Token(TokenType.ROOT, "$", 0, '$.foo["bar"]'),
+            Token(TokenType.PROPERTY, "foo", 2, '$.foo["bar"]'),
+            Token(TokenType.LBRACKET, "[", 5, '$.foo["bar"]'),
+            Token(TokenType.DOUBLE_QUOTE_STRING, "bar", 7, '$.foo["bar"]'),
+            Token(TokenType.RBRACKET, "]", 11, '$.foo["bar"]'),
+            Token(TokenType.EOF, "", 12, '$.foo["bar"]'),
         ],
     ),
     Case(
-        description="filter self dot property equality with int in scientific notation",
-        path="[?(@.some == 1e10)]",
+        description="bracketed name selector, single quotes",
+        path="$.foo['bar']",
         want=[
-            Token(
-                kind=TokenType.LBRACKET,
-                value="[",
-                index=0,
-                path="[?(@.some == 1e10)]",
-            ),
-            Token(
-                kind=TokenType.FILTER,
-                value="?",
-                index=1,
-                path="[?(@.some == 1e10)]",
-            ),
-            Token(
-                kind=TokenType.LPAREN,
-                value="(",
-                index=2,
-                path="[?(@.some == 1e10)]",
-            ),
-            Token(
-                kind=TokenType.CURRENT, value="@", index=3, path="[?(@.some == 1e10)]"
-            ),
-            Token(
-                kind=TokenType.PROPERTY,
-                value="some",
-                index=5,
-                path="[?(@.some == 1e10)]",
-            ),
-            Token(kind=TokenType.EQ, value="==", index=10, path="[?(@.some == 1e10)]"),
-            Token(
-                kind=TokenType.INT, value="1e10", index=13, path="[?(@.some == 1e10)]"
-            ),
-            Token(
-                kind=TokenType.RPAREN, value=")", index=17, path="[?(@.some == 1e10)]"
-            ),
-            Token(
-                kind=TokenType.RBRACKET, value="]", index=18, path="[?(@.some == 1e10)]"
-            ),
+            Token(TokenType.ROOT, "$", 0, "$.foo['bar']"),
+            Token(TokenType.PROPERTY, "foo", 2, "$.foo['bar']"),
+            Token(TokenType.LBRACKET, "[", 5, "$.foo['bar']"),
+            Token(TokenType.SINGLE_QUOTE_STRING, "bar", 7, "$.foo['bar']"),
+            Token(TokenType.RBRACKET, "]", 11, "$.foo['bar']"),
+            Token(TokenType.EOF, "", 12, "$.foo['bar']"),
         ],
     ),
     Case(
-        description="filter expression with logical and",
-        path="[?(@.some > 1 && @.some < 5)]",
+        description="multiple selectors",
+        path="$.foo['bar', 123, *]",
         want=[
-            Token(
-                kind=TokenType.LBRACKET,
-                value="[",
-                index=0,
-                path="[?(@.some > 1 && @.some < 5)]",
-            ),
-            Token(
-                kind=TokenType.FILTER,
-                value="?",
-                index=1,
-                path="[?(@.some > 1 && @.some < 5)]",
-            ),
-            Token(
-                kind=TokenType.LPAREN,
-                value="(",
-                index=2,
-                path="[?(@.some > 1 && @.some < 5)]",
-            ),
-            Token(
-                kind=TokenType.CURRENT,
-                value="@",
-                index=3,
-                path="[?(@.some > 1 && @.some < 5)]",
-            ),
-            Token(
-                kind=TokenType.PROPERTY,
-                value="some",
-                index=5,
-                path="[?(@.some > 1 && @.some < 5)]",
-            ),
-            Token(
-                kind=TokenType.GT,
-                value=">",
-                index=10,
-                path="[?(@.some > 1 && @.some < 5)]",
-            ),
-            Token(
-                kind=TokenType.INT,
-                value="1",
-                index=12,
-                path="[?(@.some > 1 && @.some < 5)]",
-            ),
-            Token(
-                kind=TokenType.AND,
-                value="&&",
-                index=14,
-                path="[?(@.some > 1 && @.some < 5)]",
-            ),
-            Token(
-                kind=TokenType.CURRENT,
-                value="@",
-                index=17,
-                path="[?(@.some > 1 && @.some < 5)]",
-            ),
-            Token(
-                kind=TokenType.PROPERTY,
-                value="some",
-                index=19,
-                path="[?(@.some > 1 && @.some < 5)]",
-            ),
-            Token(
-                kind=TokenType.LT,
-                value="<",
-                index=24,
-                path="[?(@.some > 1 && @.some < 5)]",
-            ),
-            Token(
-                kind=TokenType.INT,
-                value="5",
-                index=26,
-                path="[?(@.some > 1 && @.some < 5)]",
-            ),
-            Token(
-                kind=TokenType.RPAREN,
-                value=")",
-                index=27,
-                path="[?(@.some > 1 && @.some < 5)]",
-            ),
-            Token(
-                kind=TokenType.RBRACKET,
-                value="]",
-                index=28,
-                path="[?(@.some > 1 && @.some < 5)]",
-            ),
+            Token(TokenType.ROOT, "$", 0, "$.foo['bar', 123, *]"),
+            Token(TokenType.PROPERTY, "foo", 2, "$.foo['bar', 123, *]"),
+            Token(TokenType.LBRACKET, "[", 5, "$.foo['bar', 123, *]"),
+            Token(TokenType.SINGLE_QUOTE_STRING, "bar", 7, "$.foo['bar', 123, *]"),
+            Token(TokenType.COMMA, ",", 11, "$.foo['bar', 123, *]"),
+            Token(TokenType.INDEX, "123", 13, "$.foo['bar', 123, *]"),
+            Token(TokenType.COMMA, ",", 16, "$.foo['bar', 123, *]"),
+            Token(TokenType.WILD, "*", 18, "$.foo['bar', 123, *]"),
+            Token(TokenType.RBRACKET, "]", 19, "$.foo['bar', 123, *]"),
+            Token(TokenType.EOF, "", 20, "$.foo['bar', 123, *]"),
         ],
     ),
     Case(
-        description="filter expression with logical ||",
-        path="[?(@.some == 1 || @.some == 5)]",
+        description="slice",
+        path="$.foo[1:3]",
         want=[
-            Token(
-                kind=TokenType.LBRACKET,
-                value="[",
-                index=0,
-                path="[?(@.some == 1 || @.some == 5)]",
-            ),
-            Token(
-                kind=TokenType.FILTER,
-                value="?",
-                index=1,
-                path="[?(@.some == 1 || @.some == 5)]",
-            ),
-            Token(
-                kind=TokenType.LPAREN,
-                value="(",
-                index=2,
-                path="[?(@.some == 1 || @.some == 5)]",
-            ),
-            Token(
-                kind=TokenType.CURRENT,
-                value="@",
-                index=3,
-                path="[?(@.some == 1 || @.some == 5)]",
-            ),
-            Token(
-                kind=TokenType.PROPERTY,
-                value="some",
-                index=5,
-                path="[?(@.some == 1 || @.some == 5)]",
-            ),
-            Token(
-                kind=TokenType.EQ,
-                value="==",
-                index=10,
-                path="[?(@.some == 1 || @.some == 5)]",
-            ),
-            Token(
-                kind=TokenType.INT,
-                value="1",
-                index=13,
-                path="[?(@.some == 1 || @.some == 5)]",
-            ),
-            Token(
-                kind=TokenType.OR,
-                value="||",
-                index=15,
-                path="[?(@.some == 1 || @.some == 5)]",
-            ),
-            Token(
-                kind=TokenType.CURRENT,
-                value="@",
-                index=18,
-                path="[?(@.some == 1 || @.some == 5)]",
-            ),
-            Token(
-                kind=TokenType.PROPERTY,
-                value="some",
-                index=20,
-                path="[?(@.some == 1 || @.some == 5)]",
-            ),
-            Token(
-                kind=TokenType.EQ,
-                value="==",
-                index=25,
-                path="[?(@.some == 1 || @.some == 5)]",
-            ),
-            Token(
-                kind=TokenType.INT,
-                value="5",
-                index=28,
-                path="[?(@.some == 1 || @.some == 5)]",
-            ),
-            Token(
-                kind=TokenType.RPAREN,
-                value=")",
-                index=29,
-                path="[?(@.some == 1 || @.some == 5)]",
-            ),
-            Token(
-                kind=TokenType.RBRACKET,
-                value="]",
-                index=30,
-                path="[?(@.some == 1 || @.some == 5)]",
-            ),
+            Token(TokenType.ROOT, "$", 0, "$.foo[1:3]"),
+            Token(TokenType.PROPERTY, "foo", 2, "$.foo[1:3]"),
+            Token(TokenType.LBRACKET, "[", 5, "$.foo[1:3]"),
+            Token(TokenType.INDEX, "1", 6, "$.foo[1:3]"),
+            Token(TokenType.COLON, ":", 7, "$.foo[1:3]"),
+            Token(TokenType.INDEX, "3", 8, "$.foo[1:3]"),
+            Token(TokenType.RBRACKET, "]", 9, "$.foo[1:3]"),
+            Token(TokenType.EOF, "", 10, "$.foo[1:3]"),
         ],
     ),
     Case(
-        description="filter expression with logical not",
-        path="[?(@.some == 1 || !@.some < 5)]",
+        description="filter",
+        path="$.foo[?@.bar]",
         want=[
-            Token(
-                kind=TokenType.LBRACKET,
-                value="[",
-                index=0,
-                path="[?(@.some == 1 || !@.some < 5)]",
-            ),
-            Token(
-                kind=TokenType.FILTER,
-                value="?",
-                index=1,
-                path="[?(@.some == 1 || !@.some < 5)]",
-            ),
-            Token(
-                kind=TokenType.LPAREN,
-                value="(",
-                index=2,
-                path="[?(@.some == 1 || !@.some < 5)]",
-            ),
-            Token(
-                kind=TokenType.CURRENT,
-                value="@",
-                index=3,
-                path="[?(@.some == 1 || !@.some < 5)]",
-            ),
-            Token(
-                kind=TokenType.PROPERTY,
-                value="some",
-                index=5,
-                path="[?(@.some == 1 || !@.some < 5)]",
-            ),
-            Token(
-                kind=TokenType.EQ,
-                value="==",
-                index=10,
-                path="[?(@.some == 1 || !@.some < 5)]",
-            ),
-            Token(
-                kind=TokenType.INT,
-                value="1",
-                index=13,
-                path="[?(@.some == 1 || !@.some < 5)]",
-            ),
-            Token(
-                kind=TokenType.OR,
-                value="||",
-                index=15,
-                path="[?(@.some == 1 || !@.some < 5)]",
-            ),
-            Token(
-                kind=TokenType.NOT,
-                value="!",
-                index=18,
-                path="[?(@.some == 1 || !@.some < 5)]",
-            ),
-            Token(
-                kind=TokenType.CURRENT,
-                value="@",
-                index=19,
-                path="[?(@.some == 1 || !@.some < 5)]",
-            ),
-            Token(
-                kind=TokenType.PROPERTY,
-                value="some",
-                index=21,
-                path="[?(@.some == 1 || !@.some < 5)]",
-            ),
-            Token(
-                kind=TokenType.LT,
-                value="<",
-                index=26,
-                path="[?(@.some == 1 || !@.some < 5)]",
-            ),
-            Token(
-                kind=TokenType.INT,
-                value="5",
-                index=28,
-                path="[?(@.some == 1 || !@.some < 5)]",
-            ),
-            Token(
-                kind=TokenType.RPAREN,
-                value=")",
-                index=29,
-                path="[?(@.some == 1 || !@.some < 5)]",
-            ),
-            Token(
-                kind=TokenType.RBRACKET,
-                value="]",
-                index=30,
-                path="[?(@.some == 1 || !@.some < 5)]",
-            ),
+            Token(TokenType.ROOT, "$", 0, "$.foo[?@.bar]"),
+            Token(TokenType.PROPERTY, "foo", 2, "$.foo[?@.bar]"),
+            Token(TokenType.LBRACKET, "[", 5, "$.foo[?@.bar]"),
+            Token(TokenType.FILTER, "?", 6, "$.foo[?@.bar]"),
+            Token(TokenType.CURRENT, "@", 7, "$.foo[?@.bar]"),
+            Token(TokenType.PROPERTY, "bar", 9, "$.foo[?@.bar]"),
+            Token(TokenType.RBRACKET, "]", 12, "$.foo[?@.bar]"),
+            Token(TokenType.EOF, "", 13, "$.foo[?@.bar]"),
         ],
     ),
     Case(
-        description="filter true and false",
-        path="[?(true == false)]",
+        description="filter, parenthesized expression",
+        path="$.foo[?(@.bar)]",
         want=[
-            Token(
-                kind=TokenType.LBRACKET,
-                value="[",
-                index=0,
-                path="[?(true == false)]",
-            ),
-            Token(
-                kind=TokenType.FILTER,
-                value="?",
-                index=1,
-                path="[?(true == false)]",
-            ),
-            Token(
-                kind=TokenType.LPAREN,
-                value="(",
-                index=2,
-                path="[?(true == false)]",
-            ),
-            Token(
-                kind=TokenType.TRUE, value="true", index=3, path="[?(true == false)]"
-            ),
-            Token(kind=TokenType.EQ, value="==", index=8, path="[?(true == false)]"),
-            Token(
-                kind=TokenType.FALSE, value="false", index=11, path="[?(true == false)]"
-            ),
-            Token(
-                kind=TokenType.RPAREN, value=")", index=16, path="[?(true == false)]"
-            ),
-            Token(
-                kind=TokenType.RBRACKET, value="]", index=17, path="[?(true == false)]"
-            ),
+            Token(TokenType.ROOT, "$", 0, "$.foo[?(@.bar)]"),
+            Token(TokenType.PROPERTY, "foo", 2, "$.foo[?(@.bar)]"),
+            Token(TokenType.LBRACKET, "[", 5, "$.foo[?(@.bar)]"),
+            Token(TokenType.FILTER, "?", 6, "$.foo[?(@.bar)]"),
+            Token(TokenType.LPAREN, "(", 7, "$.foo[?(@.bar)]"),
+            Token(TokenType.CURRENT, "@", 8, "$.foo[?(@.bar)]"),
+            Token(TokenType.PROPERTY, "bar", 10, "$.foo[?(@.bar)]"),
+            Token(TokenType.RPAREN, ")", 13, "$.foo[?(@.bar)]"),
+            Token(TokenType.RBRACKET, "]", 14, "$.foo[?(@.bar)]"),
+            Token(TokenType.EOF, "", 15, "$.foo[?(@.bar)]"),
         ],
     ),
     Case(
-        description="list of quoted properties",
-        path="$['some', 'thing']",
+        description="two filters",
+        path="$.foo[?@.bar, ?@.baz]",
         want=[
-            Token(kind=TokenType.ROOT, value="$", index=0, path="$['some', 'thing']"),
-            Token(
-                kind=TokenType.LBRACKET, value="[", index=1, path="$['some', 'thing']"
-            ),
-            Token(
-                kind=TokenType.SINGLE_QUOTE_STRING,
-                value="some",
-                index=3,
-                path="$['some', 'thing']",
-            ),
-            Token(kind=TokenType.COMMA, value=",", index=8, path="$['some', 'thing']"),
-            Token(
-                kind=TokenType.SINGLE_QUOTE_STRING,
-                value="thing",
-                index=11,
-                path="$['some', 'thing']",
-            ),
-            Token(
-                kind=TokenType.RBRACKET, value="]", index=17, path="$['some', 'thing']"
-            ),
+            Token(TokenType.ROOT, "$", 0, "$.foo[?@.bar, ?@.baz]"),
+            Token(TokenType.PROPERTY, "foo", 2, "$.foo[?@.bar, ?@.baz]"),
+            Token(TokenType.LBRACKET, "[", 5, "$.foo[?@.bar, ?@.baz]"),
+            Token(TokenType.FILTER, "?", 6, "$.foo[?@.bar, ?@.baz]"),
+            Token(TokenType.CURRENT, "@", 7, "$.foo[?@.bar, ?@.baz]"),
+            Token(TokenType.PROPERTY, "bar", 9, "$.foo[?@.bar, ?@.baz]"),
+            Token(TokenType.COMMA, ",", 12, "$.foo[?@.bar, ?@.baz]"),
+            Token(TokenType.FILTER, "?", 14, "$.foo[?@.bar, ?@.baz]"),
+            Token(TokenType.CURRENT, "@", 15, "$.foo[?@.bar, ?@.baz]"),
+            Token(TokenType.PROPERTY, "baz", 17, "$.foo[?@.bar, ?@.baz]"),
+            Token(TokenType.RBRACKET, "]", 20, "$.foo[?@.bar, ?@.baz]"),
+            Token(TokenType.EOF, "", 21, "$.foo[?@.bar, ?@.baz]"),
         ],
     ),
     Case(
-        description="call a function",
-        path="$.some[?(length(@.thing) < 2)]",
+        description="filter, function",
+        path="$[?count(@.foo)>2]",
         want=[
-            Token(
-                kind=TokenType.ROOT,
-                value="$",
-                index=0,
-                path="$.some[?(length(@.thing) < 2)]",
-            ),
-            Token(
-                kind=TokenType.PROPERTY,
-                value="some",
-                index=2,
-                path="$.some[?(length(@.thing) < 2)]",
-            ),
-            Token(
-                kind=TokenType.LBRACKET,
-                value="[",
-                index=6,
-                path="$.some[?(length(@.thing) < 2)]",
-            ),
-            Token(
-                kind=TokenType.FILTER,
-                value="?",
-                index=7,
-                path="$.some[?(length(@.thing) < 2)]",
-            ),
-            Token(
-                kind=TokenType.LPAREN,
-                value="(",
-                index=8,
-                path="$.some[?(length(@.thing) < 2)]",
-            ),
-            Token(
-                kind=TokenType.FUNCTION,
-                value="length",
-                index=9,
-                path="$.some[?(length(@.thing) < 2)]",
-            ),
-            Token(
-                kind=TokenType.CURRENT,
-                value="@",
-                index=16,
-                path="$.some[?(length(@.thing) < 2)]",
-            ),
-            Token(
-                kind=TokenType.PROPERTY,
-                value="thing",
-                index=18,
-                path="$.some[?(length(@.thing) < 2)]",
-            ),
-            Token(
-                kind=TokenType.RPAREN,
-                value=")",
-                index=23,
-                path="$.some[?(length(@.thing) < 2)]",
-            ),
-            Token(
-                kind=TokenType.LT,
-                value="<",
-                index=25,
-                path="$.some[?(length(@.thing) < 2)]",
-            ),
-            Token(
-                kind=TokenType.INT,
-                value="2",
-                index=27,
-                path="$.some[?(length(@.thing) < 2)]",
-            ),
-            Token(
-                kind=TokenType.RPAREN,
-                value=")",
-                index=28,
-                path="$.some[?(length(@.thing) < 2)]",
-            ),
-            Token(
-                kind=TokenType.RBRACKET,
-                value="]",
-                index=29,
-                path="$.some[?(length(@.thing) < 2)]",
-            ),
+            Token(TokenType.ROOT, "$", 0, "$[?count(@.foo)>2]"),
+            Token(TokenType.LBRACKET, "[", 1, "$[?count(@.foo)>2]"),
+            Token(TokenType.FILTER, "?", 2, "$[?count(@.foo)>2]"),
+            Token(TokenType.FUNCTION, "count", 3, "$[?count(@.foo)>2]"),
+            Token(TokenType.CURRENT, "@", 9, "$[?count(@.foo)>2]"),
+            Token(TokenType.PROPERTY, "foo", 11, "$[?count(@.foo)>2]"),
+            Token(TokenType.RPAREN, ")", 14, "$[?count(@.foo)>2]"),
+            Token(TokenType.GT, ">", 15, "$[?count(@.foo)>2]"),
+            Token(TokenType.INT, "2", 16, "$[?count(@.foo)>2]"),
+            Token(TokenType.RBRACKET, "]", 17, "$[?count(@.foo)>2]"),
+            Token(TokenType.EOF, "", 18, "$[?count(@.foo)>2]"),
+        ],
+    ),
+    Case(
+        description="filter, function with two args",
+        path="$[?count(@.foo, 1)>2]",
+        want=[
+            Token(TokenType.ROOT, "$", 0, "$[?count(@.foo, 1)>2]"),
+            Token(TokenType.LBRACKET, "[", 1, "$[?count(@.foo, 1)>2]"),
+            Token(TokenType.FILTER, "?", 2, "$[?count(@.foo, 1)>2]"),
+            Token(TokenType.FUNCTION, "count", 3, "$[?count(@.foo, 1)>2]"),
+            Token(TokenType.CURRENT, "@", 9, "$[?count(@.foo, 1)>2]"),
+            Token(TokenType.PROPERTY, "foo", 11, "$[?count(@.foo, 1)>2]"),
+            Token(TokenType.COMMA, ",", 14, "$[?count(@.foo, 1)>2]"),
+            Token(TokenType.INT, "1", 16, "$[?count(@.foo, 1)>2]"),
+            Token(TokenType.RPAREN, ")", 17, "$[?count(@.foo, 1)>2]"),
+            Token(TokenType.GT, ">", 18, "$[?count(@.foo, 1)>2]"),
+            Token(TokenType.INT, "2", 19, "$[?count(@.foo, 1)>2]"),
+            Token(TokenType.RBRACKET, "]", 20, "$[?count(@.foo, 1)>2]"),
+            Token(TokenType.EOF, "", 21, "$[?count(@.foo, 1)>2]"),
+        ],
+    ),
+    Case(
+        description="filter, parenthesized function",
+        path="$[?(count(@.foo)>2)]",
+        want=[
+            Token(TokenType.ROOT, "$", 0, "$[?(count(@.foo)>2)]"),
+            Token(TokenType.LBRACKET, "[", 1, "$[?(count(@.foo)>2)]"),
+            Token(TokenType.FILTER, "?", 2, "$[?(count(@.foo)>2)]"),
+            Token(TokenType.LPAREN, "(", 3, "$[?(count(@.foo)>2)]"),
+            Token(TokenType.FUNCTION, "count", 4, "$[?(count(@.foo)>2)]"),
+            Token(TokenType.CURRENT, "@", 10, "$[?(count(@.foo)>2)]"),
+            Token(TokenType.PROPERTY, "foo", 12, "$[?(count(@.foo)>2)]"),
+            Token(TokenType.RPAREN, ")", 15, "$[?(count(@.foo)>2)]"),
+            Token(TokenType.GT, ">", 16, "$[?(count(@.foo)>2)]"),
+            Token(TokenType.INT, "2", 17, "$[?(count(@.foo)>2)]"),
+            Token(TokenType.RPAREN, ")", 18, "$[?(count(@.foo)>2)]"),
+            Token(TokenType.RBRACKET, "]", 19, "$[?(count(@.foo)>2)]"),
+            Token(TokenType.EOF, "", 20, "$[?(count(@.foo)>2)]"),
+        ],
+    ),
+    Case(
+        description="filter, parenthesized function argument",
+        path="$[?(count((@.foo),1)>2)]",
+        want=[
+            Token(TokenType.ROOT, "$", 0, "$[?(count((@.foo),1)>2)]"),
+            Token(TokenType.LBRACKET, "[", 1, "$[?(count((@.foo),1)>2)]"),
+            Token(TokenType.FILTER, "?", 2, "$[?(count((@.foo),1)>2)]"),
+            Token(TokenType.LPAREN, "(", 3, "$[?(count((@.foo),1)>2)]"),
+            Token(TokenType.FUNCTION, "count", 4, "$[?(count((@.foo),1)>2)]"),
+            Token(TokenType.LPAREN, "(", 10, "$[?(count((@.foo),1)>2)]"),
+            Token(TokenType.CURRENT, "@", 11, "$[?(count((@.foo),1)>2)]"),
+            Token(TokenType.PROPERTY, "foo", 13, "$[?(count((@.foo),1)>2)]"),
+            Token(TokenType.RPAREN, ")", 16, "$[?(count((@.foo),1)>2)]"),
+            Token(TokenType.COMMA, ",", 17, "$[?(count((@.foo),1)>2)]"),
+            Token(TokenType.INT, "1", 18, "$[?(count((@.foo),1)>2)]"),
+            Token(TokenType.RPAREN, ")", 19, "$[?(count((@.foo),1)>2)]"),
+            Token(TokenType.GT, ">", 20, "$[?(count((@.foo),1)>2)]"),
+            Token(TokenType.INT, "2", 21, "$[?(count((@.foo),1)>2)]"),
+            Token(TokenType.RPAREN, ")", 22, "$[?(count((@.foo),1)>2)]"),
+            Token(TokenType.RBRACKET, "]", 23, "$[?(count((@.foo),1)>2)]"),
+            Token(TokenType.EOF, "", 24, "$[?(count((@.foo),1)>2)]"),
+        ],
+    ),
+    Case(
+        description="filter, nested",
+        path="$[?@[?@>1]]",
+        want=[
+            Token(TokenType.ROOT, "$", 0, "$[?@[?@>1]]"),
+            Token(TokenType.LBRACKET, "[", 1, "$[?@[?@>1]]"),
+            Token(TokenType.FILTER, "?", 2, "$[?@[?@>1]]"),
+            Token(TokenType.CURRENT, "@", 3, "$[?@[?@>1]]"),
+            Token(TokenType.LBRACKET, "[", 4, "$[?@[?@>1]]"),
+            Token(TokenType.FILTER, "?", 5, "$[?@[?@>1]]"),
+            Token(TokenType.CURRENT, "@", 6, "$[?@[?@>1]]"),
+            Token(TokenType.GT, ">", 7, "$[?@[?@>1]]"),
+            Token(TokenType.INT, "1", 8, "$[?@[?@>1]]"),
+            Token(TokenType.RBRACKET, "]", 9, "$[?@[?@>1]]"),
+            Token(TokenType.RBRACKET, "]", 10, "$[?@[?@>1]]"),
+            Token(TokenType.EOF, "", 11, "$[?@[?@>1]]"),
+        ],
+    ),
+    Case(
+        description="filter, nested brackets",
+        path="$[?@[?@[1]>1]]",
+        want=[
+            Token(TokenType.ROOT, "$", 0, "$[?@[?@[1]>1]]"),
+            Token(TokenType.LBRACKET, "[", 1, "$[?@[?@[1]>1]]"),
+            Token(TokenType.FILTER, "?", 2, "$[?@[?@[1]>1]]"),
+            Token(TokenType.CURRENT, "@", 3, "$[?@[?@[1]>1]]"),
+            Token(TokenType.LBRACKET, "[", 4, "$[?@[?@[1]>1]]"),
+            Token(TokenType.FILTER, "?", 5, "$[?@[?@[1]>1]]"),
+            Token(TokenType.CURRENT, "@", 6, "$[?@[?@[1]>1]]"),
+            Token(TokenType.LBRACKET, "[", 7, "$[?@[?@[1]>1]]"),
+            Token(TokenType.INDEX, "1", 8, "$[?@[?@[1]>1]]"),
+            Token(TokenType.RBRACKET, "]", 9, "$[?@[?@[1]>1]]"),
+            Token(TokenType.GT, ">", 10, "$[?@[?@[1]>1]]"),
+            Token(TokenType.INT, "1", 11, "$[?@[?@[1]>1]]"),
+            Token(TokenType.RBRACKET, "]", 12, "$[?@[?@[1]>1]]"),
+            Token(TokenType.RBRACKET, "]", 13, "$[?@[?@[1]>1]]"),
+            Token(TokenType.EOF, "", 14, "$[?@[?@[1]>1]]"),
+        ],
+    ),
+    Case(
+        description="function",
+        path="$[?foo()]",
+        want=[
+            Token(TokenType.ROOT, "$", 0, "$[?foo()]"),
+            Token(TokenType.LBRACKET, "[", 1, "$[?foo()]"),
+            Token(TokenType.FILTER, "?", 2, "$[?foo()]"),
+            Token(TokenType.FUNCTION, "foo", 3, "$[?foo()]"),
+            Token(TokenType.RPAREN, ")", 7, "$[?foo()]"),
+            Token(TokenType.RBRACKET, "]", 8, "$[?foo()]"),
+            Token(TokenType.EOF, "", 9, "$[?foo()]"),
+        ],
+    ),
+    Case(
+        description="function",
+        path="$[?foo()]",
+        want=[
+            Token(TokenType.ROOT, "$", 0, "$[?foo()]"),
+            Token(TokenType.LBRACKET, "[", 1, "$[?foo()]"),
+            Token(TokenType.FILTER, "?", 2, "$[?foo()]"),
+            Token(TokenType.FUNCTION, "foo", 3, "$[?foo()]"),
+            Token(TokenType.RPAREN, ")", 7, "$[?foo()]"),
+            Token(TokenType.RBRACKET, "]", 8, "$[?foo()]"),
+            Token(TokenType.EOF, "", 9, "$[?foo()]"),
+        ],
+    ),
+    Case(
+        description="function, int literal",
+        path="$[?foo(42)]",
+        want=[
+            Token(TokenType.ROOT, "$", 0, "$[?foo(42)]"),
+            Token(TokenType.LBRACKET, "[", 1, "$[?foo(42)]"),
+            Token(TokenType.FILTER, "?", 2, "$[?foo(42)]"),
+            Token(TokenType.FUNCTION, "foo", 3, "$[?foo(42)]"),
+            Token(TokenType.INT, "42", 7, "$[?foo(42)]"),
+            Token(TokenType.RPAREN, ")", 9, "$[?foo(42)]"),
+            Token(TokenType.RBRACKET, "]", 10, "$[?foo(42)]"),
+            Token(TokenType.EOF, "", 11, "$[?foo(42)]"),
+        ],
+    ),
+    Case(
+        description="function, two int args",
+        path="$[?foo(42, -7)]",
+        want=[
+            Token(TokenType.ROOT, "$", 0, "$[?foo(42, -7)]"),
+            Token(TokenType.LBRACKET, "[", 1, "$[?foo(42, -7)]"),
+            Token(TokenType.FILTER, "?", 2, "$[?foo(42, -7)]"),
+            Token(TokenType.FUNCTION, "foo", 3, "$[?foo(42, -7)]"),
+            Token(TokenType.INT, "42", 7, "$[?foo(42, -7)]"),
+            Token(TokenType.COMMA, ",", 9, "$[?foo(42, -7)]"),
+            Token(TokenType.INT, "-7", 11, "$[?foo(42, -7)]"),
+            Token(TokenType.RPAREN, ")", 13, "$[?foo(42, -7)]"),
+            Token(TokenType.RBRACKET, "]", 14, "$[?foo(42, -7)]"),
+            Token(TokenType.EOF, "", 15, "$[?foo(42, -7)]"),
+        ],
+    ),
+    Case(
+        description="boolean literals",
+        path="$[?true==false]",
+        want=[
+            Token(TokenType.ROOT, "$", 0, "$[?true==false]"),
+            Token(TokenType.LBRACKET, "[", 1, "$[?true==false]"),
+            Token(TokenType.FILTER, "?", 2, "$[?true==false]"),
+            Token(TokenType.TRUE, "true", 3, "$[?true==false]"),
+            Token(TokenType.EQ, "==", 7, "$[?true==false]"),
+            Token(TokenType.FALSE, "false", 9, "$[?true==false]"),
+            Token(TokenType.RBRACKET, "]", 14, "$[?true==false]"),
+            Token(TokenType.EOF, "", 15, "$[?true==false]"),
+        ],
+    ),
+    Case(
+        description="logical and",
+        path="$[?true && false]",
+        want=[
+            Token(TokenType.ROOT, "$", 0, "$[?true && false]"),
+            Token(TokenType.LBRACKET, "[", 1, "$[?true && false]"),
+            Token(TokenType.FILTER, "?", 2, "$[?true && false]"),
+            Token(TokenType.TRUE, "true", 3, "$[?true && false]"),
+            Token(TokenType.AND, "&&", 8, "$[?true && false]"),
+            Token(TokenType.FALSE, "false", 11, "$[?true && false]"),
+            Token(TokenType.RBRACKET, "]", 16, "$[?true && false]"),
+            Token(TokenType.EOF, "", 17, "$[?true && false]"),
+        ],
+    ),
+    Case(
+        description="float",
+        path="$[?@.foo > 42.7]",
+        want=[
+            Token(TokenType.ROOT, "$", 0, "$[?@.foo > 42.7]"),
+            Token(TokenType.LBRACKET, "[", 1, "$[?@.foo > 42.7]"),
+            Token(TokenType.FILTER, "?", 2, "$[?@.foo > 42.7]"),
+            Token(TokenType.CURRENT, "@", 3, "$[?@.foo > 42.7]"),
+            Token(TokenType.PROPERTY, "foo", 5, "$[?@.foo > 42.7]"),
+            Token(TokenType.GT, ">", 9, "$[?@.foo > 42.7]"),
+            Token(TokenType.FLOAT, "42.7", 11, "$[?@.foo > 42.7]"),
+            Token(TokenType.RBRACKET, "]", 15, "$[?@.foo > 42.7]"),
+            Token(TokenType.EOF, "", 16, "$[?@.foo > 42.7]"),
         ],
     ),
 ]
 
 
-@pytest.fixture()
-def env() -> JSONPathEnvironment:
-    return JSONPathEnvironment()
-
-
 @pytest.mark.parametrize("case", TEST_CASES, ids=operator.attrgetter("description"))
-def test_lexer(env: JSONPathEnvironment, case: Case) -> None:
-    tokens = list(env.lexer.tokenize(case.path))
-    assert tokens == case.want
-
-
-def test_illegal_token(env: JSONPathEnvironment) -> None:
-    with pytest.raises(JSONPathSyntaxError):
-        list(env.lexer.tokenize("%"))
+def test_lexer(case: Case) -> None:
+    lexer, tokens = lex(case.path)
+    lexer.run()
+    assert lexer.tokens == case.want
