@@ -1,6 +1,10 @@
+from typing import Any
+from typing import List
+
 import pytest
 
 from jsonpath_rfc9535 import JSONPathEnvironment
+from jsonpath_rfc9535.exceptions import JSONPathRecursionError
 from jsonpath_rfc9535.exceptions import JSONPathSyntaxError
 from jsonpath_rfc9535.exceptions import JSONPathTypeError
 
@@ -30,3 +34,26 @@ def test_function_too_many_params(env: JSONPathEnvironment) -> None:
 def test_non_singular_query_is_not_comparable(env: JSONPathEnvironment) -> None:
     with pytest.raises(JSONPathTypeError):
         env.compile("$[?@.* > 2]")
+
+
+def test_recursive_data(env: JSONPathEnvironment) -> None:
+    query = "$..a"
+    arr: List[Any] = []
+    data: Any = {"foo": arr}
+    arr.append(data)
+
+    with pytest.raises(JSONPathRecursionError):
+        env.query(query, data)
+
+
+class MockEnv(JSONPathEnvironment):
+    max_recursion_depth = 3
+
+
+def test_low_recursion_limit() -> None:
+    env = MockEnv()
+    query = "$..a"
+    data = {"foo": [{"bar": [1, 2, 3]}]}
+
+    with pytest.raises(JSONPathRecursionError):
+        env.query(query, data)

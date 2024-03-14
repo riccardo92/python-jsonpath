@@ -2,6 +2,7 @@ from .environment import JSONPathEnvironment
 from .exceptions import JSONPathError
 from .exceptions import JSONPathIndexError
 from .exceptions import JSONPathNameError
+from .exceptions import JSONPathRecursionError
 from .exceptions import JSONPathSyntaxError
 from .exceptions import JSONPathTypeError
 from .expressions import NOTHING
@@ -16,16 +17,9 @@ __all__ = (
     "JSONPathError",
     "JSONPathIndexError",
     "JSONPathNameError",
+    "JSONPathRecursionError",
     "JSONPathSyntaxError",
     "JSONPathTypeError",
-    "JSONPointerError",
-    "JSONPointerIndexError",
-    "JSONPointerKeyError",
-    "JSONPointerResolutionError",
-    "JSONPointerTypeError",
-    "RelativeJSONPointerError",
-    "RelativeJSONPointerIndexError",
-    "RelativeJSONPointerSyntaxError",
     "NOTHING",
     "Lexer",
     "JSONPathNode",

@@ -8,6 +8,7 @@ from typing import TYPE_CHECKING
 from typing import Iterable
 from typing import Tuple
 
+from .exceptions import JSONPathRecursionError
 from .node import JSONPathNode
 
 if TYPE_CHECKING:
@@ -70,30 +71,30 @@ class JSONPathRecursiveDescentSegment(JSONPathSegment):
                 for selector in self.selectors:
                     yield from selector.resolve(_node)
 
-    def _visit(self, node: JSONPathNode) -> Iterable[JSONPathNode]:
+    def _visit(self, node: JSONPathNode, depth: int = 1) -> Iterable[JSONPathNode]:
+        if depth > self.env.max_recursion_depth:
+            raise JSONPathRecursionError("recursion limit exceeded", token=self.token)
+
         yield node
+
         if isinstance(node.value, dict):
             for key, val in node.value.items():
-                # if isinstance(val, str):
-                #     continue
                 if isinstance(val, (dict, list)):
                     _node = JSONPathNode(
                         value=val,
                         parts=node.parts + (key,),
                         root=node.root,
                     )
-                    yield from self._visit(_node)
+                    yield from self._visit(_node, depth + 1)
         elif isinstance(node.value, list):
             for i, val in enumerate(node.value):
-                if isinstance(val, str):
-                    continue
-                elif isinstance(val, (dict, list)):
+                if isinstance(val, (dict, list)):
                     _node = JSONPathNode(
                         value=val,
                         parts=node.parts + (i,),
                         root=node.root,
                     )
-                    yield from self._visit(_node)
+                    yield from self._visit(_node, depth + 1)
 
     def __str__(self) -> str:
         return f"..[{', '.join(str(itm) for itm in self.selectors)}]"

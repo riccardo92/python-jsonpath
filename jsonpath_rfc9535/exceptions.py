@@ -88,3 +88,16 @@ class JSONPathLexerError(JSONPathError):
     def __init__(self, *args: object, token: Token) -> None:
         super().__init__(*args)
         self.token = token
+
+
+class JSONPathRecursionError(JSONPathError):
+    """An exception raised when the maximum recursion depth is reached.
+
+    Arguments:
+        args: Arguments passed to `Exception`.
+        token: The token that caused the error.
+    """
+
+    def __init__(self, *args: object, token: Token) -> None:
+        super().__init__(*args)
+        self.token = token
