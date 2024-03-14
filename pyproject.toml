@@ -30,13 +30,13 @@ Issues = "https://github.com/jg-rp/python-jsonpath-rfc9535/issues"
 Source = "https://github.com/jg-rp/python-jsonpath-rfc9535"
 
 [tool.hatch.version]
-path = "jsonpath/__about__.py"
+path = "jsonpath_rfc9535/__about__.py"
 
 [tool.hatch.build.targets.sdist]
-include = ["/jsonpath"]
+include = ["/jsonpath_rfc9535"]
 
 [tool.hatch.build.targets.wheel]
-include = ["/jsonpath"]
+include = ["/jsonpath_rfc9535"]
 
 [tool.hatch.envs.default]
 dependencies = [
@@ -171,7 +171,7 @@ force-single-line = true
 convention = "google"
 
 [tool.ruff.lint.per-file-ignores]
-"jsonpath/__about__.py" = ["D100"]
-"jsonpath/__init__.py" = ["D104"]
+"jsonpath_rfc9535/__about__.py" = ["D100"]
+"jsonpath_rfc9535/__init__.py" = ["D104"]
 "tests/*" = ["D100", "D101", "D104", "D103"]
-"jsonpath/lex.py" = ["E741"]
+"jsonpath_rfc9535/lex.py" = ["E741"]

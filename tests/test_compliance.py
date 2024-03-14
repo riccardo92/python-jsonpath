@@ -17,7 +17,7 @@ from typing import Union
 
 import pytest
 
-import jsonpath
+import jsonpath_rfc9535 as jsonpath
 
 
 @dataclass

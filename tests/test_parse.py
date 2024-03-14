@@ -3,7 +3,7 @@ import operator
 
 import pytest
 
-from jsonpath import JSONPathEnvironment
+from jsonpath_rfc9535 import JSONPathEnvironment
 
 
 @dataclasses.dataclass

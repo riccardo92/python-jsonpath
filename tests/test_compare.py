@@ -5,7 +5,7 @@ import operator
 
 import pytest
 
-from jsonpath.expressions import _compare
+from jsonpath_rfc9535.expressions import _compare
 
 
 @dataclasses.dataclass

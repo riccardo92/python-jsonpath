@@ -8,7 +8,7 @@ from .filter_function import ExpressionType
 from .filter_function import FilterFunction
 
 if TYPE_CHECKING:
-    from jsonpath.node import JSONPathNodeList
+    from jsonpath_rfc9535.node import JSONPathNodeList
 
 
 class Count(FilterFunction):

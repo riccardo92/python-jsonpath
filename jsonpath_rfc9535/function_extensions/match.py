@@ -2,8 +2,8 @@
 
 import regex as re
 
-from jsonpath.function_extensions import ExpressionType
-from jsonpath.function_extensions import FilterFunction
+from jsonpath_rfc9535.function_extensions import ExpressionType
+from jsonpath_rfc9535.function_extensions import FilterFunction
 
 
 class Match(FilterFunction):
