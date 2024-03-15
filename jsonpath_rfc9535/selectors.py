@@ -2,10 +2,12 @@
 
 from __future__ import annotations
 
+import random
 from abc import ABC
 from abc import abstractmethod
 from contextlib import suppress
 from typing import TYPE_CHECKING
+from typing import Any
 from typing import Iterable
 from typing import Optional
 from typing import Sequence
@@ -211,7 +213,14 @@ class WildSelector(JSONPathSelector):
     def resolve(self, node: JSONPathNode) -> Iterable[JSONPathNode]:
         """Select all items from a array/list or values from a dict/object."""
         if isinstance(node.value, dict):
-            for key, val in node.value.items():
+            if self.env.nondeterministic:
+                _items = list(node.value.items())
+                random.shuffle(_items)
+                items: Iterable[Any] = iter(_items)
+            else:
+                items = node.value.items()
+
+            for key, val in items:
                 _node = JSONPathNode(
                     value=val,
                     parts=node.parts + (key,),
@@ -257,10 +266,17 @@ class Filter(JSONPathSelector):
     def __hash__(self) -> int:
         return hash((str(self.expression), self.token))
 
-    def resolve(self, node: JSONPathNode) -> Iterable[JSONPathNode]:
+    def resolve(self, node: JSONPathNode) -> Iterable[JSONPathNode]:  # noqa: PLR0912
         """Select array/list items or dict/object values where with a filter."""
         if isinstance(node.value, dict):
-            for key, val in node.value.items():
+            if self.env.nondeterministic:
+                _items = list(node.value.items())
+                random.shuffle(_items)
+                items: Iterable[Any] = iter(_items)
+            else:
+                items = node.value.items()
+
+            for key, val in items:
                 context = FilterContext(
                     env=self.env,
                     current=val,
