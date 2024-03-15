@@ -168,3 +168,4 @@ convention = "google"
 "jsonpath_rfc9535/__init__.py" = ["D104"]
 "tests/*" = ["D100", "D101", "D104", "D103"]
 "jsonpath_rfc9535/lex.py" = ["E741"]
+"scripts/nondeterministic_descent.py" = ["D103", "T201"]

@@ -59,10 +59,12 @@ class JSONPathEnvironment:
             index. Defaults to `(2**53) - 1`.
         min_int_index (int): The minimum integer allowed when selecting array items by
             index. Defaults to `-(2**53) + 1`.
-        max_recursion_depth: The maximum number of dict/objects and/or arrays/lists the
-            recursive descent selector can visit before a `JSONPathRecursionError`
-            is thrown.
-        parser_class: The parser to use when parsing tokens from the lexer.
+        max_recursion_depth (int): The maximum number of dict/objects and/or
+            arrays/lists the recursive descent selector can visit before a
+            `JSONPathRecursionError` is thrown.
+        parser_class (Parser): The parser to use when parsing tokens from the lexer.
+        nondeterministic (bool): If `True`, enable nondeterminism when iterating objects
+            and visiting nodes with the recursive descent segment. Defaults to `False`.
     """
 
     parser_class: Type[Parser] = Parser
@@ -70,6 +72,8 @@ class JSONPathEnvironment:
     max_int_index = (2**53) - 1
     min_int_index = -(2**53) + 1
     max_recursion_depth = 100
+
+    nondeterministic = False
 
     def __init__(self) -> None:
         self.parser: Parser = self.parser_class(env=self)

@@ -36,7 +36,11 @@ def test_non_singular_query_is_not_comparable(env: JSONPathEnvironment) -> None:
         env.compile("$[?@.* > 2]")
 
 
-def test_recursive_data(env: JSONPathEnvironment) -> None:
+def test_recursive_data() -> None:
+    class MockEnv(JSONPathEnvironment):
+        nondeterministic = False
+
+    env = MockEnv()
     query = "$..a"
     arr: List[Any] = []
     data: Any = {"foo": arr}
@@ -46,11 +50,10 @@ def test_recursive_data(env: JSONPathEnvironment) -> None:
         env.query(query, data)
 
 
-class MockEnv(JSONPathEnvironment):
-    max_recursion_depth = 3
-
-
 def test_low_recursion_limit() -> None:
+    class MockEnv(JSONPathEnvironment):
+        max_recursion_depth = 3
+
     env = MockEnv()
     query = "$..a"
     data = {"foo": [{"bar": [1, 2, 3]}]}

@@ -1,3 +1,4 @@
+from .environment import JSONLikeData
 from .environment import JSONPathEnvironment
 from .exceptions import JSONPathError
 from .exceptions import JSONPathIndexError
@@ -13,6 +14,7 @@ from .parse import Parser
 from .path import JSONPath
 
 __all__ = (
+    "JSONLikeData",
     "JSONPathEnvironment",
     "JSONPathError",
     "JSONPathIndexError",
