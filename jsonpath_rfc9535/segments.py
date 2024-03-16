@@ -129,7 +129,7 @@ class JSONPathRecursiveDescentSegment(JSONPathSegment):
                         )
             elif isinstance(node.value, list):
                 for i, element in enumerate(node.value):
-                    if isinstance(val, (dict, list)):
+                    if isinstance(element, (dict, list)):
                         yield JSONPathNode(
                             value=element,
                             location=node.location + (i,),
