@@ -146,10 +146,10 @@ class JSONPathRecursiveDescentSegment(JSONPathSegment):
             visit_children = random.choice([True, False])  # noqa: S311
             for child in _children(_node):
                 if visit_children:
-                    queue.append(child)
-                else:
                     yield child
                     queue.extend(_children(child))
+                else:
+                    queue.append(child)
 
     def __str__(self) -> str:
         return f"..[{', '.join(str(itm) for itm in self.selectors)}]"
