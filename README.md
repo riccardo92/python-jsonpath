@@ -46,7 +46,7 @@ The returned list is a subclass of `list` with some helper methods.
 **Example:**
 
 ```python
-from jsonpath_rfc9535 import find
+import jsonpath_rfc9535 as jsonpath
 
 value = {
     "users": [
@@ -58,7 +58,7 @@ value = {
     "moderator": "John",
 }
 
-for node in find("$.users[?@.score > 85]", value):
+for node in jsonpath.find("$.users[?@.score > 85]", value):
     print(f"{node.value} at '{node.path()}'")
 
 # {'name': 'Sue', 'score': 100} at '$['users'][0]'
