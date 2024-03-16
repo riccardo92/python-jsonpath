@@ -93,20 +93,20 @@ class JSONPathRecursiveDescentSegment(JSONPathSegment):
         yield node
 
         if isinstance(node.value, dict):
-            for key, val in node.value.items():
+            for name, val in node.value.items():
                 if isinstance(val, (dict, list)):
                     _node = JSONPathNode(
                         value=val,
-                        parts=node.parts + (key,),
+                        location=node.location + (name,),
                         root=node.root,
                     )
                     yield from self._visit(_node, depth + 1)
         elif isinstance(node.value, list):
-            for i, val in enumerate(node.value):
-                if isinstance(val, (dict, list)):
+            for i, element in enumerate(node.value):
+                if isinstance(element, (dict, list)):
                     _node = JSONPathNode(
-                        value=val,
-                        parts=node.parts + (i,),
+                        value=element,
+                        location=node.location + (i,),
                         root=node.root,
                     )
                     yield from self._visit(_node, depth + 1)
@@ -120,19 +120,19 @@ class JSONPathRecursiveDescentSegment(JSONPathSegment):
             if isinstance(node.value, dict):
                 items = list(node.value.items())
                 random.shuffle(items)
-                for key, val in items:
+                for name, val in items:
                     if isinstance(val, (dict, list)):
                         yield JSONPathNode(
                             value=val,
-                            parts=node.parts + (key,),
+                            location=node.location + (name,),
                             root=node.root,
                         )
             elif isinstance(node.value, list):
-                for i, val in enumerate(node.value):
+                for i, element in enumerate(node.value):
                     if isinstance(val, (dict, list)):
                         yield JSONPathNode(
-                            value=val,
-                            parts=node.parts + (i,),
+                            value=element,
+                            location=node.location + (i,),
                             root=node.root,
                         )
 

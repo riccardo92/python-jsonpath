@@ -47,7 +47,7 @@ def test_recursive_data() -> None:
     arr.append(data)
 
     with pytest.raises(JSONPathRecursionError):
-        env.query(query, data)
+        env.find(query, data)
 
 
 def test_low_recursion_limit() -> None:
@@ -59,4 +59,4 @@ def test_low_recursion_limit() -> None:
     data = {"foo": [{"bar": [1, 2, 3]}]}
 
     with pytest.raises(JSONPathRecursionError):
-        env.query(query, data)
+        env.find(query, data)

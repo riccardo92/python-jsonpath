@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from jsonpath_rfc9535.expressions import NOTHING
+from jsonpath_rfc9535.filter_expressions import NOTHING
 from jsonpath_rfc9535.function_extensions import ExpressionType
 from jsonpath_rfc9535.function_extensions import FilterFunction
 
@@ -13,7 +13,7 @@ if TYPE_CHECKING:
 
 
 class Value(FilterFunction):
-    """A type-aware implementation of the standard `value` function."""
+    """The standard `value` function."""
 
     arg_types = [ExpressionType.NODES]
     return_type = ExpressionType.VALUE

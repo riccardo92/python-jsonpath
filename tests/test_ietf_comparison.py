@@ -42,8 +42,8 @@ import operator
 
 import pytest
 
-from jsonpath_rfc9535.expressions import NOTHING
-from jsonpath_rfc9535.expressions import _compare
+from jsonpath_rfc9535.filter_expressions import NOTHING
+from jsonpath_rfc9535.filter_expressions import _compare
 from jsonpath_rfc9535.node import JSONPathNodeList
 
 

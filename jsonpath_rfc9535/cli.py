@@ -1,4 +1,4 @@
-"""JSONPath, JSON Pointer and JSON Patch command line interface."""
+"""JSONPath command line interface."""
 
 import argparse
 import json
@@ -14,8 +14,8 @@ INDENT = 2
 
 _EPILOG = """\
 Example usage:
-  Find values in source.json matching a JSONPath query, write them to result.json.
-  $ jsonpath-rfc9535 path -q "$.foo['bar'][?@.baz > 1]" -f source.json -o result.json
+  Find values in source.json matching a JSONPath expression, output to result.json.
+  $ jsonpath-rfc9535 -q "$.foo['bar'][?@.baz > 1]" -f source.json -o result.json
 """
 
 
@@ -31,8 +31,7 @@ def setup_parser() -> argparse.ArgumentParser:  # noqa: D103
         prog="jsonpath-rfc9535",
         formatter_class=DescriptionHelpFormatter,
         description=(
-            "Find values in a JSON document given an "
-            "RFC 9535 JSONPath query expression."
+            "Find values in a JSON document given an RFC 9535 JSONPath expression."
         ),
         epilog=_EPILOG,
     )
@@ -63,14 +62,14 @@ def setup_parser() -> argparse.ArgumentParser:  # noqa: D103
     group.add_argument(
         "-q",
         "--query",
-        help="JSONPath query string.",
+        help="JSONPath expression as a string.",
     )
 
     group.add_argument(
         "-r",
-        "--path-file",
+        "--query-file",
         type=argparse.FileType(mode="r"),
-        help="Text file containing a JSONPath query.",
+        help="Text file containing a JSONPath expression.",
     )
 
     parser.add_argument(
@@ -98,9 +97,7 @@ def setup_parser() -> argparse.ArgumentParser:  # noqa: D103
     return parser
 
 
-def handle_path_command(args: argparse.Namespace) -> None:  # noqa: PLR0912
-    """Handle the `path` sub command."""
-    # Empty string is OK.
+def handle_path_command(args: argparse.Namespace) -> None:  # noqa: PLR0912, D103
     if args.query is not None:
         query = args.query
     else:
@@ -111,22 +108,22 @@ def handle_path_command(args: argparse.Namespace) -> None:  # noqa: PLR0912
     except JSONPathSyntaxError as err:
         if args.debug:
             raise
-        sys.stderr.write(f"json path syntax error: {err}\n")
+        sys.stderr.write(f"syntax error: {err}\n")
         sys.exit(1)
     except JSONPathTypeError as err:
         if args.debug:
             raise
-        sys.stderr.write(f"json path type error: {err}\n")
+        sys.stderr.write(f"type error: {err}\n")
         sys.exit(1)
     except JSONPathIndexError as err:
         if args.debug:
             raise
-        sys.stderr.write(f"json path index error: {err}\n")
+        sys.stderr.write(f"index error: {err}\n")
         sys.exit(1)
 
     try:
         data = json.load(args.file)
-        matches = path.findall(data)
+        values = path.find(data).values()
     except json.JSONDecodeError as err:
         if args.debug:
             raise
@@ -136,11 +133,11 @@ def handle_path_command(args: argparse.Namespace) -> None:  # noqa: PLR0912
         # Type errors are currently only occurring are compile-time.
         if args.debug:
             raise
-        sys.stderr.write(f"json path type error: {err}\n")
+        sys.stderr.write(f"type error: {err}\n")
         sys.exit(1)
 
     indent = INDENT if args.pretty else None
-    json.dump(matches, args.output, indent=indent)
+    json.dump(values, args.output, indent=indent)
 
 
 def main() -> None:

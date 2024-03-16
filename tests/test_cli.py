@@ -127,7 +127,7 @@ def test_path_command_invalid_target_debug(
         handle_path_command(args)
 
 
-def test_json_path_syntax_error(
+def test_jsonpath_syntax_error(
     parser: argparse.ArgumentParser,
     sample_target: str,
     capsys: pytest.CaptureFixture[str],
@@ -140,10 +140,10 @@ def test_json_path_syntax_error(
 
     assert err.value.code == 1
     captured = capsys.readouterr()
-    assert captured.err.startswith("json path syntax error")
+    assert captured.err.startswith("syntax error")
 
 
-def test_json_path_syntax_error_debug(
+def test_jsonpath_syntax_error_debug(
     parser: argparse.ArgumentParser,
     sample_target: str,
 ) -> None:
@@ -153,7 +153,7 @@ def test_json_path_syntax_error_debug(
         handle_path_command(args)
 
 
-def test_json_path_type_error(
+def test_jsonpath_type_error(
     parser: argparse.ArgumentParser,
     sample_target: str,
     capsys: pytest.CaptureFixture[str],
@@ -166,10 +166,10 @@ def test_json_path_type_error(
 
     captured = capsys.readouterr()
     assert err.value.code == 1
-    assert captured.err.startswith("json path type error")
+    assert captured.err.startswith("type error")
 
 
-def test_json_path_type_error_debug(
+def test_jsonpath_type_error_debug(
     parser: argparse.ArgumentParser,
     sample_target: str,
 ) -> None:
@@ -182,7 +182,7 @@ def test_json_path_type_error_debug(
         handle_path_command(args)
 
 
-def test_json_path_not_well_typed(
+def test_jsonpath_not_well_typed(
     parser: argparse.ArgumentParser,
     sample_target: str,
     capsys: pytest.CaptureFixture[str],
@@ -205,10 +205,10 @@ def test_json_path_not_well_typed(
 
     captured = capsys.readouterr()
     assert err.value.code == 1
-    assert captured.err.startswith("json path type error")
+    assert captured.err.startswith("type error")
 
 
-def test_json_path_index_error(
+def test_jsonpath_index_error(
     parser: argparse.ArgumentParser,
     sample_target: str,
     capsys: pytest.CaptureFixture[str],
@@ -221,10 +221,10 @@ def test_json_path_index_error(
 
     captured = capsys.readouterr()
     assert err.value.code == 1
-    assert captured.err.startswith("json path index error")
+    assert captured.err.startswith("index error")
 
 
-def test_json_path_index_error_debug(
+def test_jsonpath_index_error_debug(
     parser: argparse.ArgumentParser,
     sample_target: str,
 ) -> None:
@@ -235,7 +235,7 @@ def test_json_path_index_error_debug(
         handle_path_command(args)
 
 
-def test_json_path(
+def test_jsonpath(
     parser: argparse.ArgumentParser,
     sample_target: str,
     outfile: str,

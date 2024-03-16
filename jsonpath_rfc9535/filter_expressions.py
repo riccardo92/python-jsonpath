@@ -18,9 +18,9 @@ from .exceptions import JSONPathTypeError
 from .node import JSONPathNodeList
 
 if TYPE_CHECKING:
-    from .environment import JSONLikeData
     from .environment import JSONPathEnvironment
-    from .path import JSONPath
+    from .environment import JSONValue
+    from .query import JSONPathQuery
     from .tokens import Token
 
 
@@ -232,48 +232,48 @@ class ComparisonExpression(Expression):
         return _compare(left, self.operator, right)
 
 
-class Path(Expression, ABC):
+class FilterQuery(Expression, ABC):
     """Base class for all query selectors."""
 
-    __slots__ = ("path",)
+    __slots__ = ("query",)
 
-    def __init__(self, token: Token, path: JSONPath) -> None:
+    def __init__(self, token: Token, query: JSONPathQuery) -> None:
         super().__init__(token)
-        self.path = path
+        self.query = query
 
     def __eq__(self, other: object) -> bool:
-        return isinstance(other, Path) and str(self) == str(other)
+        return isinstance(other, FilterQuery) and str(self) == str(other)
 
 
-class CurrentPath(Path):
-    """A JSONPath query starting at the current node."""
+class RelativeFilterQuery(FilterQuery):
+    """A JSONPath expression starting at the current node."""
 
     __slots__ = ()
 
     def __str__(self) -> str:
-        return "@" + str(self.path)[1:]
+        return "@" + str(self.query)[1:]
 
     def evaluate(self, context: FilterContext) -> object:
         """Evaluate the filter expression in the given _context_."""
         if not isinstance(context.current, (list, dict)):
-            if self.path.empty():
+            if self.query.empty():
                 return context.current
             return JSONPathNodeList()
 
-        return JSONPathNodeList(self.path.query(context.current))
+        return JSONPathNodeList(self.query.find(context.current))
 
 
-class RootPath(Path):
-    """A JSONPath query starting at the root node."""
+class RootFilterQuery(FilterQuery):
+    """A JSONPath expression starting at the root node."""
 
     __slots__ = ()
 
     def __str__(self) -> str:
-        return str(self.path)
+        return str(self.query)
 
     def evaluate(self, context: FilterContext) -> object:
         """Evaluate the filter expression in the given _context_."""
-        return JSONPathNodeList(self.path.query(context.root))
+        return JSONPathNodeList(self.query.find(context.root))
 
 
 class FunctionExtension(Expression):
@@ -347,7 +347,7 @@ class FilterContext:
         *,
         env: JSONPathEnvironment,
         current: object,
-        root: JSONLikeData,
+        root: JSONValue,
     ) -> None:
         self.env = env
         self.current = current
@@ -378,7 +378,7 @@ NOTHING = Nothing()
 
 
 def _is_truthy(obj: object) -> bool:
-    """Test for truthiness when evaluating JSONPath filter expressions."""
+    """Test for truthiness when evaluating filter expressions."""
     if isinstance(obj, JSONPathNodeList) and len(obj) == 0:
         return False
     if obj is NOTHING:
@@ -391,7 +391,7 @@ def _is_truthy(obj: object) -> bool:
 def _compare(  # noqa: PLR0911
     left: object, operator: str, right: object
 ) -> bool:
-    """Object comparison within JSONPath filters.
+    """Object comparison within filter expressions.
 
     Args:
         left: The left hand side of the comparison expression.

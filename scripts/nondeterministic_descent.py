@@ -13,10 +13,10 @@ from jsonpath_rfc9535.utils.nondeterministic_descent import pp_tree
 from jsonpath_rfc9535.utils.nondeterministic_descent import pre_order_visit
 
 if TYPE_CHECKING:
-    from jsonpath_rfc9535 import JSONLikeData
+    from jsonpath_rfc9535 import JSONValue
 
 
-def pp_json_path_perms(data: JSONLikeData) -> None:  # noqa: D103
+def pp_json_path_perms(data: JSONValue) -> None:  # noqa: D103
     print("Input data")
     print(f"\033[92m{data}\033[0m")
     aux_tree = AuxNode.from_(data)

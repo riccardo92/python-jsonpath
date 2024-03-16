@@ -18,7 +18,7 @@ from jsonpath_rfc9535 import JSONPathEnvironment
 @dataclasses.dataclass
 class Case:
     description: str
-    path: str
+    query: str
     data: Union[List[Any], Dict[str, Any]]
     want: Union[List[Any], Dict[str, Any]]
 
@@ -60,19 +60,19 @@ REFERENCE_DATA = {
 TEST_CASES = [
     Case(
         description="(reference) authors of all books in store",
-        path="$.store.book[*].author",
+        query="$.store.book[*].author",
         data=REFERENCE_DATA,
         want=["Nigel Rees", "Evelyn Waugh", "Herman Melville", "J. R. R. Tolkien"],
     ),
     Case(
         description="(reference) all authors",
-        path="$..author",
+        query="$..author",
         data=REFERENCE_DATA,
         want=["Nigel Rees", "Evelyn Waugh", "Herman Melville", "J. R. R. Tolkien"],
     ),
     Case(
         description="(reference) all store items",
-        path="$.store.*",
+        query="$.store.*",
         data=REFERENCE_DATA,
         want=[
             [
@@ -108,13 +108,13 @@ TEST_CASES = [
     ),
     Case(
         description="(reference) prices of all store items",
-        path="$.store..price",
+        query="$.store..price",
         data=REFERENCE_DATA,
         want=[8.95, 12.99, 8.99, 22.99, 19.95],
     ),
     Case(
         description="(reference) the third book",
-        path="$..book[2]",
+        query="$..book[2]",
         data=REFERENCE_DATA,
         want=[
             {
@@ -128,7 +128,7 @@ TEST_CASES = [
     ),
     Case(
         description="(reference) the last book",
-        path="$..book[-1:]",
+        query="$..book[-1:]",
         data=REFERENCE_DATA,
         want=[
             {
@@ -142,7 +142,7 @@ TEST_CASES = [
     ),
     Case(
         description="(reference) the first two books",
-        path="$..book[0,1]",
+        query="$..book[0,1]",
         data=REFERENCE_DATA,
         want=[
             {
@@ -161,7 +161,7 @@ TEST_CASES = [
     ),
     Case(
         description="(reference) the first two books slice notation",
-        path="$..book[:2]",
+        query="$..book[:2]",
         data=REFERENCE_DATA,
         want=[
             {
@@ -180,7 +180,7 @@ TEST_CASES = [
     ),
     Case(
         description="(reference) filter books with ISBN number",
-        path="$..book[?(@.isbn)]",
+        query="$..book[?(@.isbn)]",
         data=REFERENCE_DATA,
         want=[
             {
@@ -201,7 +201,7 @@ TEST_CASES = [
     ),
     Case(
         description="(reference) filter books cheaper than 10",
-        path="$..book[?(@.price<10)]",
+        query="$..book[?(@.price<10)]",
         data=REFERENCE_DATA,
         want=[
             {
@@ -221,7 +221,7 @@ TEST_CASES = [
     ),
     # Case(
     #     description="root descent",
-    #     path="$..",
+    #     query="$..",
     #     data=REFERENCE_DATA,
     #     want=[
     #         {
@@ -347,7 +347,7 @@ TEST_CASES = [
     # ),
     Case(
         description="(reference) all elements",
-        path="$..*",
+        query="$..*",
         data=REFERENCE_DATA,
         want=[
             {
@@ -468,5 +468,5 @@ def env() -> JSONPathEnvironment:
 
 @pytest.mark.parametrize("case", TEST_CASES, ids=operator.attrgetter("description"))
 def test_goessner(env: JSONPathEnvironment, case: Case) -> None:
-    path = env.compile(case.path)
-    assert path.findall(case.data) == case.want
+    path = env.compile(case.query)
+    assert path.find(case.data).values() == case.want

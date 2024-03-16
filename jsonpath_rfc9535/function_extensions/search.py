@@ -7,7 +7,7 @@ from jsonpath_rfc9535.function_extensions import FilterFunction
 
 
 class Search(FilterFunction):
-    """A type-aware implementation of the standard `search` function."""
+    """The standard `search` function."""
 
     arg_types = [ExpressionType.VALUE, ExpressionType.VALUE]
     return_type = ExpressionType.LOGICAL

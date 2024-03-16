@@ -15,7 +15,7 @@ from typing import TextIO
 from typing import Tuple
 
 if TYPE_CHECKING:
-    from jsonpath_rfc9535.environment import JSONLikeData
+    from jsonpath_rfc9535.environment import JSONValue
 
 
 HORIZONTAL_SEP = "\N{BOX DRAWINGS LIGHT HORIZONTAL}" * 2
@@ -38,7 +38,7 @@ COLOR_CODES = [
 class AuxNode:
     """A auxiliary tree node, including a list of child nodes and depth.
 
-    Use the `from_(data)` static method to build an auxiliary tree instead of
+    Use the `from_(value)` static method to build an auxiliary tree instead of
     instantiating this class directly.
     """
 
@@ -57,8 +57,8 @@ class AuxNode:
         return f"{c_start}{self.value}{c_stop}"
 
     @staticmethod
-    def from_(data: JSONLikeData, *, collections_only: bool = False) -> AuxNode:
-        """Build a tree from JSON-like _data_."""
+    def from_(value: JSONValue, *, collections_only: bool = False) -> AuxNode:
+        """Build a tree from JSON-like _value_."""
 
         def _visit(node: AuxNode, depth: int = 0) -> None:
             if isinstance(node.value, dict):
@@ -75,7 +75,7 @@ class AuxNode:
                         _visit(_node, depth + 1)
                         node.children.append(_node)
 
-        root = AuxNode(0, data)
+        root = AuxNode(0, value)
         _visit(root)
         return root
 

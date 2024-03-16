@@ -32,7 +32,7 @@ class JSONPathError(Exception):
 
 
 class JSONPathSyntaxError(JSONPathError):
-    """An exception raised when a error occurs during JSONPath query parsing.
+    """An exception raised when a error occurs during JSONPath expression parsing.
 
     Arguments:
         args: Arguments passed to `Exception`.

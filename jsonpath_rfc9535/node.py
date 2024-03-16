@@ -8,7 +8,7 @@ from typing import Tuple
 from typing import Union
 
 if TYPE_CHECKING:
-    from .environment import JSONLikeData
+    from .environment import JSONValue
 
 
 class JSONPathNode:
@@ -16,12 +16,12 @@ class JSONPathNode:
 
     Attributes:
         value: The JSON-like value at this node.
-        location: The keys and/or indices that make up the normalized path to _value_.
+        location: The names indices that make up the normalized path to _value_.
     """
 
     __slots__ = (
         "value",
-        "parts",
+        "location",
         "root",
     )
 
@@ -29,17 +29,17 @@ class JSONPathNode:
         self,
         *,
         value: object,
-        parts: Tuple[Union[int, str], ...],
-        root: JSONLikeData,
+        location: Tuple[Union[int, str], ...],
+        root: JSONValue,
     ) -> None:
         self.value: object = value
-        self.parts: Tuple[Union[int, str], ...] = parts
+        self.location: Tuple[Union[int, str], ...] = location
         self.root = root
 
     def path(self) -> str:
         """Return the normalized path to this node."""
         return "$" + "".join(
-            (f"['{p}']" if isinstance(p, str) else f"[{p}]" for p in self.parts)
+            (f"['{p}']" if isinstance(p, str) else f"[{p}]" for p in self.location)
         )
 
     def __str__(self) -> str:

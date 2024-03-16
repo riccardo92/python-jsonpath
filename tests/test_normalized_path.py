@@ -13,7 +13,7 @@ from jsonpath_rfc9535 import JSONPathEnvironment
 @dataclasses.dataclass
 class Case:
     description: str
-    path: str
+    query: str
     data: Union[List[Any], Dict[str, Any]]
     want: List[str]
 
@@ -21,13 +21,13 @@ class Case:
 TEST_CASES = [
     Case(
         description="normalized negative index",
-        path="$.a[-2]",
+        query="$.a[-2]",
         data={"a": [1, 2, 3, 4, 5]},
         want=["$['a'][3]"],
     ),
     Case(
         description="normalized reverse slice",
-        path="$.a[3:0:-1]",
+        query="$.a[3:0:-1]",
         data={"a": [1, 2, 3, 4, 5]},
         want=["$['a'][3]", "$['a'][2]", "$['a'][1]"],
     ),
@@ -41,8 +41,8 @@ def env() -> JSONPathEnvironment:
 
 @pytest.mark.parametrize("case", TEST_CASES, ids=operator.attrgetter("description"))
 def test_find(env: JSONPathEnvironment, case: Case) -> None:
-    path = env.compile(case.path)
-    nodes = list(path.query(case.data))
+    path = env.compile(case.query)
+    nodes = list(path.find(case.data))
     assert len(nodes) == len(case.want)
     for node, want in zip(nodes, case.want):  # noqa: B905
         assert node.path() == want

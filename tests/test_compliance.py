@@ -15,14 +15,14 @@ from typing import Optional
 import pytest
 
 import jsonpath_rfc9535 as jsonpath
-from jsonpath_rfc9535.environment import JSONLikeData
+from jsonpath_rfc9535.environment import JSONValue
 
 
 @dataclass
 class Case:
     name: str
     selector: str
-    document: JSONLikeData = None
+    document: JSONValue = None
     result: Any = None
     results: Optional[List[Any]] = None
     invalid_selector: Optional[bool] = None
@@ -51,9 +51,7 @@ def test_compliance(case: Case) -> None:
         pytest.skip(reason=SKIP[case.name])  # no cov
 
     assert case.document is not None
-    rv = jsonpath.JSONPathNodeList(
-        jsonpath.query(case.selector, case.document)
-    ).values()
+    rv = jsonpath.JSONPathNodeList(jsonpath.find(case.selector, case.document)).values()
 
     if case.results is not None:
         assert rv in case.results

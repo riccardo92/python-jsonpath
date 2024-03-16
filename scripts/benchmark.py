@@ -27,15 +27,15 @@ def valid_queries() -> Sequence[CTSCase]:
 
 QUERIES = valid_queries()
 
-COMPILE_AND_FIND_SETUP = "from jsonpath_rfc9535 import query"
+COMPILE_AND_FIND_SETUP = "from jsonpath_rfc9535 import find"
 
 COMPILE_AND_FIND_STMT = """\
 for path, data in QUERIES:
-    list(query(path, data))"""
+    list(find(path, data))"""
 
 COMPILE_AND_FIND_VALUES_STMT = """\
 for path, data in QUERIES:
-    [node.value for node in query(path, data)]"""
+    [node.value for node in find(path, data)]"""
 
 JUST_COMPILE_SETUP = "from jsonpath_rfc9535 import compile"
 
@@ -50,11 +50,11 @@ compiled_queries = [(compile(q), d) for q, d in QUERIES]
 
 JUST_FIND_STMT = """\
 for path, data in compiled_queries:
-    list(path.query(data))"""
+    list(path.find(data))"""
 
 JUST_FIND_VALUES_STMT = """\
 for path, data in compiled_queries:
-    [node.value for node in path.query(data)]"""
+    [node.value for node in path.find(data)]"""
 
 
 def benchmark(number: int = 100, best_of: int = 3) -> None:

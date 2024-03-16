@@ -14,12 +14,12 @@ from typing import Sequence
 
 from .exceptions import JSONPathIndexError
 from .exceptions import JSONPathTypeError
-from .expressions import FilterContext
+from .filter_expressions import FilterContext
 from .node import JSONPathNode
 
 if TYPE_CHECKING:
     from .environment import JSONPathEnvironment
-    from .expressions import FilterExpression
+    from .filter_expressions import FilterExpression
     from .tokens import Token
 
 
@@ -44,8 +44,8 @@ class JSONPathSelector(ABC):
         """
 
 
-class PropertySelector(JSONPathSelector):
-    """The property or key selector."""
+class NameSelector(JSONPathSelector):
+    """The name selector."""
 
     __slots__ = ("name",)
 
@@ -64,7 +64,7 @@ class PropertySelector(JSONPathSelector):
 
     def __eq__(self, __value: object) -> bool:
         return (
-            isinstance(__value, PropertySelector)
+            isinstance(__value, NameSelector)
             and self.name == __value.name
             and self.token == __value.token
         )
@@ -78,7 +78,7 @@ class PropertySelector(JSONPathSelector):
             with suppress(KeyError):
                 yield JSONPathNode(
                     value=node.value[self.name],
-                    parts=node.parts + (self.name,),
+                    location=node.location + (self.name,),
                     root=node.root,
                 )
 
@@ -127,7 +127,7 @@ class IndexSelector(JSONPathSelector):
             with suppress(IndexError):
                 _node = JSONPathNode(
                     value=node.value[self.index],
-                    parts=node.parts + (norm_index,),
+                    location=node.location + (norm_index,),
                     root=node.root,
                 )
                 yield _node
@@ -184,18 +184,18 @@ class SliceSelector(JSONPathSelector):
         if isinstance(node.value, list) and self.slice.step != 0:
             idx = self.slice.start or 0
             step = self.slice.step or 1
-            for obj in node.value[self.slice]:
+            for element in node.value[self.slice]:
                 norm_index = self._normalized_index(node.value, idx)
                 _node = JSONPathNode(
-                    value=obj,
-                    parts=node.parts + (norm_index,),
+                    value=element,
+                    location=node.location + (norm_index,),
                     root=node.root,
                 )
                 yield _node
                 idx += step
 
 
-class WildSelector(JSONPathSelector):
+class WildcardSelector(JSONPathSelector):
     """The wildcard selector."""
 
     def __init__(self, *, env: JSONPathEnvironment, token: Token) -> None:
@@ -205,34 +205,34 @@ class WildSelector(JSONPathSelector):
         return "*"
 
     def __eq__(self, __value: object) -> bool:
-        return isinstance(__value, WildSelector) and self.token == __value.token
+        return isinstance(__value, WildcardSelector) and self.token == __value.token
 
     def __hash__(self) -> int:
         return hash(self.token)
 
     def resolve(self, node: JSONPathNode) -> Iterable[JSONPathNode]:
-        """Select all items from a array/list or values from a dict/object."""
+        """Select all elements from a array/list or values from a dict/object."""
         if isinstance(node.value, dict):
             if self.env.nondeterministic:
-                _items = list(node.value.items())
-                random.shuffle(_items)
-                items: Iterable[Any] = iter(_items)
+                _members = list(node.value.items())
+                random.shuffle(_members)
+                members: Iterable[Any] = iter(_members)
             else:
-                items = node.value.items()
+                members = node.value.items()
 
-            for key, val in items:
+            for name, val in members:
                 _node = JSONPathNode(
                     value=val,
-                    parts=node.parts + (key,),
+                    location=node.location + (name,),
                     root=node.root,
                 )
                 yield _node
 
         elif isinstance(node.value, list):
-            for i, val in enumerate(node.value):
+            for i, element in enumerate(node.value):
                 _node = JSONPathNode(
-                    value=val,
-                    parts=node.parts + (i,),
+                    value=element,
+                    location=node.location + (i,),
                     root=node.root,
                 )
                 yield _node
@@ -270,13 +270,13 @@ class Filter(JSONPathSelector):
         """Select array/list items or dict/object values where with a filter."""
         if isinstance(node.value, dict):
             if self.env.nondeterministic:
-                _items = list(node.value.items())
-                random.shuffle(_items)
-                items: Iterable[Any] = iter(_items)
+                _members = list(node.value.items())
+                random.shuffle(_members)
+                members: Iterable[Any] = iter(_members)
             else:
-                items = node.value.items()
+                members = node.value.items()
 
-            for key, val in items:
+            for name, val in members:
                 context = FilterContext(
                     env=self.env,
                     current=val,
@@ -286,7 +286,7 @@ class Filter(JSONPathSelector):
                     if self.expression.evaluate(context):
                         yield JSONPathNode(
                             value=val,
-                            parts=node.parts + (key,),
+                            location=node.location + (name,),
                             root=node.root,
                         )
                 except JSONPathTypeError as err:
@@ -295,17 +295,17 @@ class Filter(JSONPathSelector):
                     raise
 
         elif isinstance(node.value, list):
-            for i, value in enumerate(node.value):
+            for i, element in enumerate(node.value):
                 context = FilterContext(
                     env=self.env,
-                    current=value,
+                    current=element,
                     root=node.root,
                 )
                 try:
                     if self.expression.evaluate(context):
                         yield JSONPathNode(
-                            value=value,
-                            parts=node.parts + (i,),
+                            value=element,
+                            location=node.location + (i,),
                             root=node.root,
                         )
                 except JSONPathTypeError as err:

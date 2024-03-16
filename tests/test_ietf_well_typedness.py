@@ -51,95 +51,95 @@ from jsonpath_rfc9535.node import JSONPathNodeList
 @dataclasses.dataclass
 class Case:
     description: str
-    path: str
+    query: str
     valid: bool
 
 
 TEST_CASES = [
     Case(
         description="length, singular query, compared",
-        path="$[?length(@) < 3]",
+        query="$[?length(@) < 3]",
         valid=True,
     ),
     Case(
         description="length, non-singular query, compared",
-        path="$[?length(@.*) < 3]",
+        query="$[?length(@.*) < 3]",
         valid=False,
     ),
     Case(
         description="count, non-singular query, compared",
-        path="$[?count(@.*) == 1]",
+        query="$[?count(@.*) == 1]",
         valid=True,
     ),
     Case(
         description="count, int literal, compared",
-        path="$[?count(1) == 1]",
+        query="$[?count(1) == 1]",
         valid=False,
     ),
     Case(
         description="nested function, LogicalType -> NodesType",
-        path="$[?count(foo(@.*)) == 1]",
+        query="$[?count(foo(@.*)) == 1]",
         valid=True,
     ),
     Case(
         description="match, singular query, string literal",
-        path="$[?match(@.timezone, 'Europe/.*')]",
+        query="$[?match(@.timezone, 'Europe/.*')]",
         valid=True,
     ),
     Case(
         description="match, singular query, string literal, compared",
-        path="$[?match(@.timezone, 'Europe/.*') == true]",
+        query="$[?match(@.timezone, 'Europe/.*') == true]",
         valid=False,
     ),
     Case(
         description="value, non-singular query param, comparison",
-        path="$[?value(@..color) == 'red']",
+        query="$[?value(@..color) == 'red']",
         valid=True,
     ),
     Case(
         description="value, non-singular query param",
-        path="$[?value(@..color)]",
+        query="$[?value(@..color)]",
         valid=False,
     ),
     Case(
         description="function, singular query, value type param, logical return type",
-        path="$[?bar(@.a)]",
+        query="$[?bar(@.a)]",
         valid=True,
     ),
     Case(
         description=(
             "function, non-singular query, value type param, logical return type"
         ),
-        path="$[?bar(@.*)]",
+        query="$[?bar(@.*)]",
         valid=False,
     ),
     Case(
         description=(
             "function, non-singular query, nodes type param, logical return type"
         ),
-        path="$[?bn(@.*)]",
+        query="$[?bn(@.*)]",
         valid=True,
     ),
     Case(
         description=(
             "function, non-singular query, logical type param, logical return type"
         ),
-        path="$[?bl(@.*)]",
+        query="$[?bl(@.*)]",
         valid=True,
     ),
     Case(
         description="function, logical type param, comparison, logical return type",
-        path="$[?bl(1==1)]",
+        query="$[?bl(1==1)]",
         valid=True,
     ),
     Case(
         description="function, logical type param, literal, logical return type",
-        path="$[?bl(1)]",
+        query="$[?bl(1)]",
         valid=False,
     ),
     Case(
         description="function, value type param, literal, logical return type",
-        path="$[?bar(1)]",
+        query="$[?bar(1)]",
         valid=True,
     ),
 ]
@@ -190,7 +190,7 @@ def env() -> JSONPathEnvironment:
 @pytest.mark.parametrize("case", TEST_CASES, ids=operator.attrgetter("description"))
 def test_ietf_well_typedness(env: JSONPathEnvironment, case: Case) -> None:
     if case.valid:
-        env.compile(case.path)
+        env.compile(case.query)
     else:
         with pytest.raises(JSONPathTypeError):
-            env.compile(case.path)
+            env.compile(case.query)

@@ -26,18 +26,16 @@ TODO:
 
 ## Usage
 
-NOTE: If you're coming from [Python JSONPath](https://github.com/jg-rp/python-jsonpath), this API is similar but different. Neither implementation is guaranteed to be a drop-in replacement for the other.
+### `find(query, value)`
 
-### `query(path, data)`
+Apply JSONPath expression _query_ to _value_. _value_ should arbitrary, possible nested, Python dictionaries, lists, strings, integers, floats, Booleans or `None`, as you would get from [`json.load()`](https://docs.python.org/3/library/json.html#json.load).
 
-Apply JSONPath expression _path_ to _data_. _data_ should arbitrary, possible nested, Python dictionaries, lists, strings, integers, floats, booleans or `None`, as you would get from [`json.load()`](https://docs.python.org/3/library/json.html#json.load).
-
-A list of `JSONPathNode` instances is returned, one node for each value in _data_ matched by _path_. The returned list will be empty if there were no matches.
+A list of `JSONPathNode` instances is returned, one node for each value matched by _path_. The returned list will be empty if there were no matches.
 
 Each `JSONPathNode` has:
 
 - a `value` property, which is the JSON-like value associated with the node.
-- a `parts` property, which is a tuple of property names and array/list indices that were required to reach the node's value in the target JSON document.
+- a `location` property, which is a tuple of property names and array/list indexes that were required to reach the node's value in the target JSON document.
 - a `path()` method, which returns the normalized path to the node in the target JSON document.
 
 The returned list is a subclass of `list` with some helper methods.
@@ -48,9 +46,9 @@ The returned list is a subclass of `list` with some helper methods.
 **Example:**
 
 ```python
-from jsonpath_rfc9535 import query
+from jsonpath_rfc9535 import find
 
-data = {
+value = {
     "users": [
         {"name": "Sue", "score": 100},
         {"name": "John", "score": 86, "admin": True},
@@ -60,22 +58,16 @@ data = {
     "moderator": "John",
 }
 
-for node in query("$.users[?@.score > 85]", data):
+for node in find("$.users[?@.score > 85]", value):
     print(f"{node.value} at '{node.path()}'")
 
 # {'name': 'Sue', 'score': 100} at '$['users'][0]'
 # {'name': 'John', 'score': 86, 'admin': True} at '$['users'][1]'
 ```
 
-### findall(path, data)
+### finditer(query, value)
 
-`findall()` accepts the same arguments as [`query()`](#querypath-data), but returns a list of value rather than a list of nodes.
-
-`findall()` is equivalent to `query("$.some.thing", data).values()`.
-
-### finditer(path, data)
-
-`finditer()` accepts the same arguments as [`query()`](#querypath-data), but returns an iterator over `JSONPathNode` instances rather than a list. This could be useful if you're expecting a large number of results that you don't want to load into memory all at once.
+`finditer()` accepts the same arguments as [`find()`](#findquery-value), but returns an iterator over `JSONPathNode` instances rather than a list. This could be useful if you're expecting a large number of results that you don't want to load into memory all at once.
 
 ## License
 

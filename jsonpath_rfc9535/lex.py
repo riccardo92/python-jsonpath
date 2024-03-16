@@ -1,4 +1,4 @@
-"""JSONPath query expression lexical scanner."""
+"""JSONPath expression lexical scanner."""
 
 from __future__ import annotations
 
@@ -30,11 +30,11 @@ RE_ESCAPE = re.compile(r"\\[bfnrtu/]")
 
 
 class Lexer:
-    """JSONPath query expression lexical scanner."""
+    """JSONPath expression lexical scanner."""
 
-    __slots__ = ("filter_depth", "paren_stack", "tokens", "start", "pos", "path")
+    __slots__ = ("filter_depth", "paren_stack", "tokens", "start", "pos", "query")
 
-    def __init__(self, path: str) -> None:
+    def __init__(self, query: str) -> None:
         self.filter_depth = 0
         """Filter nesting level."""
 
@@ -46,7 +46,7 @@ class Lexer:
         """
 
         self.tokens: List[Token] = []
-        """Tokens resulting from scanning a JSONPath query string."""
+        """Tokens resulting from scanning a JSONPath expression."""
 
         self.start = 0
         """Pointer to the start of the current token."""
@@ -54,11 +54,11 @@ class Lexer:
         self.pos = 0
         """Pointer to the current character."""
 
-        self.path = path
-        """The JSONPath query string being scanned."""
+        self.query = query
+        """The JSONPath expression being scanned."""
 
     def run(self) -> None:
-        """Start scanning this lexer's JSONPath query string."""
+        """Start scanning this lexer's JSONPath expression."""
         state: Optional[StateFn] = lex_root
         while state is not None:
             state = state(self)
@@ -68,19 +68,19 @@ class Lexer:
         self.tokens.append(
             Token(
                 t,
-                self.path[self.start : self.pos],
+                self.query[self.start : self.pos],
                 self.start,
-                self.path,
+                self.query,
             )
         )
         self.start = self.pos
 
     def next(self) -> str:
         """Return the next character, or the empty string if no more characters."""
-        if self.pos >= len(self.path):
+        if self.pos >= len(self.query):
             return ""
 
-        c = self.path[self.pos]
+        c = self.query[self.pos]
         self.pos += 1
         return c
 
@@ -94,7 +94,7 @@ class Lexer:
             # Cant backup beyond start.
             msg = "unexpected end of expression"
             raise JSONPathSyntaxError(
-                msg, token=Token(TokenType.ERROR, msg, self.pos, self.path)
+                msg, token=Token(TokenType.ERROR, msg, self.pos, self.query)
             )
         self.pos -= 1
 
@@ -116,7 +116,7 @@ class Lexer:
 
     def accept_match(self, pattern: Pattern[str]) -> bool:
         """Match _pattern_ starting from the pointer."""
-        match = pattern.match(self.path, self.pos)
+        match = pattern.match(self.query, self.pos)
         if match:
             self.pos += len(match.group())
             return True
@@ -127,10 +127,10 @@ class Lexer:
         if self.pos != self.start:
             msg = (
                 "must emit or ignore before consuming whitespace "
-                f"({self.path[self.start: self.pos]})"
+                f"({self.query[self.start: self.pos]})"
             )
             raise JSONPathLexerError(
-                msg, token=Token(TokenType.ERROR, msg, self.pos, self.path)
+                msg, token=Token(TokenType.ERROR, msg, self.pos, self.query)
             )
 
         if self.accept_match(RE_WHITESPACE):
@@ -140,7 +140,7 @@ class Lexer:
 
     def error(self, msg: str) -> None:
         """Emit an error token."""
-        self.tokens.append(Token(TokenType.ERROR, msg, self.pos, self.path))
+        self.tokens.append(Token(TokenType.ERROR, msg, self.pos, self.query))
 
 
 StateFn = Callable[[Lexer], Optional["StateFn"]]
@@ -462,7 +462,7 @@ def lex_string_factory(quote: str, state: StateFn) -> StateFn:
             return state
 
         while True:
-            head = l.path[l.pos : l.pos + 2]
+            head = l.query[l.pos : l.pos + 2]
             c = l.next()
 
             if head in ("\\\\", f"\\{quote}"):
@@ -505,18 +505,18 @@ lex_double_quoted_string_inside_filter_expression = lex_string_factory(
 )
 
 
-def lex(path: str) -> Tuple[Lexer, List[Token]]:
-    """Return a lexer for _path_ and an array to be populated with Tokens."""
-    lexer = Lexer(path)
+def lex(query: str) -> Tuple[Lexer, List[Token]]:
+    """Return a lexer for _query_ and an array to be populated with Tokens."""
+    lexer = Lexer(query)
     return lexer, lexer.tokens
 
 
-def tokenize(path: str) -> List[Token]:
-    """Scan JSONPath query _path_ and return a list of tokens."""
-    lexer, tokens = lex(path)
+def tokenize(query: str) -> List[Token]:
+    """Scan JSONPath expression _query_ and return a list of tokens."""
+    lexer, tokens = lex(query)
     lexer.run()
 
-    if tokens and tokens[-1].kind == TokenType.ERROR:
+    if tokens and tokens[-1].type_ == TokenType.ERROR:
         raise JSONPathSyntaxError(tokens[-1].value, token=tokens[-1])
 
     return tokens

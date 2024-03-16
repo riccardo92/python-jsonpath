@@ -18,26 +18,26 @@ from typing import Union
 from . import function_extensions
 from .exceptions import JSONPathNameError
 from .exceptions import JSONPathTypeError
-from .expressions import ComparisonExpression
-from .expressions import FunctionExtension
-from .expressions import JSONPathLiteral
-from .expressions import LogicalExpression
-from .expressions import Path
+from .filter_expressions import ComparisonExpression
+from .filter_expressions import FilterQuery
+from .filter_expressions import FunctionExtension
+from .filter_expressions import JSONPathLiteral
+from .filter_expressions import LogicalExpression
 from .function_extensions import ExpressionType
 from .function_extensions import FilterFunction
 from .lex import tokenize
 from .parse import Parser
-from .path import JSONPath
+from .query import JSONPathQuery
 from .tokens import TokenStream
 
 if TYPE_CHECKING:
-    from .expressions import Expression
+    from .filter_expressions import Expression
     from .node import JSONPathNode
     from .node import JSONPathNodeList
     from .tokens import Token
 
 
-JSONLikeData = Union[
+JSONValue = Union[
     List[Any],
     Dict[str, Any],
     str,
@@ -84,86 +84,65 @@ class JSONPathEnvironment:
 
         self.setup_function_extensions()
 
-    def compile(self, path: str) -> JSONPath:  # noqa: A003
-        """Prepare a path string ready for repeated matching against different data.
+    def compile(self, query: str) -> JSONPathQuery:  # noqa: A003
+        """Prepare a JSONPath expression ready for repeated application.
 
         Arguments:
-            path: A JSONPath query string.
+            query: A JSONPath expression.
 
         Returns:
-            A `JSONPath` ready to match against some data.
+            A `JSONPathQuery` ready to match against a JSON-like value.
 
         Raises:
-            JSONPathSyntaxError: If _path_ is invalid.
+            JSONPathSyntaxError: If _query_ is invalid.
             JSONPathTypeError: If filter functions are given arguments of an
                 unacceptable type.
         """
-        tokens = tokenize(path)
+        tokens = tokenize(query)
         stream = TokenStream(tokens)
-        return JSONPath(env=self, segments=tuple(self.parser.parse(stream)))
+        return JSONPathQuery(env=self, segments=tuple(self.parser.parse(stream)))
 
     def finditer(
         self,
-        path: str,
-        data: JSONLikeData,
+        query: str,
+        value: JSONValue,
     ) -> Iterable[JSONPathNode]:
-        """Generate `JSONPathNode` instances for each match of _path_ in _data_.
+        """Generate `JSONPathNode` instances for each match of _query_ in _value_.
 
         Arguments:
-            path: A JSONPath query string.
-            data: JSON-like data to query, as you'd get from `json.load`.
+            query: A JSONPath expression.
+            value: JSON-like data to query, as you'd get from `json.load`.
 
         Returns:
             An iterator yielding `JSONPathNode` objects for each match.
 
         Raises:
-            JSONPathSyntaxError: If the path is invalid.
+            JSONPathSyntaxError: If the query is invalid.
             JSONPathTypeError: If a filter expression attempts to use types in
                 an incompatible way.
         """
-        return self.compile(path).finditer(data)
+        return self.compile(query).finditer(value)
 
-    def findall(
+    def find(
         self,
-        path: str,
-        data: JSONLikeData,
-    ) -> List[object]:
-        """Find all values in _data_ matching JSONPath query _path_.
-
-        Arguments:
-            path: A JSONPath query string.
-            data: JSON-like data to query, as you'd get from `json.load`.
-
-        Returns:
-            A list of matched values. If there are no matches, the list will be empty.
-
-        Raises:
-            JSONPathSyntaxError: If the path is invalid.
-            JSONPathTypeError: If a filter expression attempts to use types in
-                an incompatible way.
-        """
-        return self.compile(path).findall(data)
-
-    def query(
-        self,
-        path: str,
-        data: JSONLikeData,
+        query: str,
+        value: JSONValue,
     ) -> JSONPathNodeList:
-        """Apply the JSONPath query _path_ to JSON-like _data_.
+        """Apply the JSONPath expression _query_ to JSON-like data _value_.
 
         Arguments:
-            path: A JSONPath query string.
-            data: JSON-like data to query, as you'd get from `json.load`.
+            query: A JSONPath expression.
+            value: JSON-like data to query, as you'd get from `json.load`.
 
         Returns:
             A list of `JSONPathNode` instance.
 
         Raises:
-            JSONPathSyntaxError: If the path is invalid.
+            JSONPathSyntaxError: If the query is invalid.
             JSONPathTypeError: If a filter expression attempts to use types in
                 an incompatible way.
         """
-        return self.compile(path).query(data)
+        return self.compile(query).find(value)
 
     def setup_function_extensions(self) -> None:
         """Initialize function extensions."""
@@ -176,11 +155,7 @@ class JSONPathEnvironment:
     def validate_function_extension_signature(
         self, token: Token, args: List[Any]
     ) -> List[Any]:
-        """Compile-time validation of function extension arguments.
-
-        RFC 9535 requires us to reject paths that use filter functions with
-        too many or too few arguments.
-        """
+        """Compile-time validation of function extension arguments."""
         try:
             func = self.function_extensions[token.value]
         except KeyError as err:
@@ -211,7 +186,7 @@ class JSONPathEnvironment:
             if typ == ExpressionType.VALUE:
                 if not (
                     isinstance(arg, JSONPathLiteral)
-                    or (isinstance(arg, Path) and arg.path.singular_query())
+                    or (isinstance(arg, FilterQuery) and arg.query.singular_query())
                     or (self._function_return_type(arg) == ExpressionType.VALUE)
                 ):
                     raise JSONPathTypeError(
@@ -220,14 +195,14 @@ class JSONPathEnvironment:
                     )
             elif typ == ExpressionType.LOGICAL:
                 if not isinstance(
-                    arg, (Path, (LogicalExpression, ComparisonExpression))
+                    arg, (FilterQuery, (LogicalExpression, ComparisonExpression))
                 ):
                     raise JSONPathTypeError(
                         f"{token.value}() argument {idx} must be of LogicalType",
                         token=token,
                     )
             elif typ == ExpressionType.NODES and not (
-                isinstance(arg, Path)
+                isinstance(arg, FilterQuery)
                 or self._function_return_type(arg) == ExpressionType.NODES
             ):
                 raise JSONPathTypeError(

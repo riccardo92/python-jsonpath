@@ -13,15 +13,15 @@ from typing import Optional
 
 import pytest
 
-from jsonpath_rfc9535 import JSONLikeData
 from jsonpath_rfc9535 import JSONPathEnvironment
+from jsonpath_rfc9535 import JSONValue
 
 
 @dataclass
 class Case:
     name: str
     selector: str
-    document: JSONLikeData = None
+    document: JSONValue = None
     result: Any = None
     results: Optional[List[Any]] = None
     invalid_selector: Optional[bool] = None
@@ -45,7 +45,7 @@ class MockEnv(JSONPathEnvironment):
 def test_nondeterminism(case: Case) -> None:
     assert case.document is not None
     env = MockEnv()
-    rv = env.findall(case.selector, case.document)
+    rv = env.find(case.selector, case.document).values()
 
     if case.results is not None:
         assert rv in case.results

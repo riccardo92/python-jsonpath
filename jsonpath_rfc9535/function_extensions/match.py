@@ -7,7 +7,7 @@ from jsonpath_rfc9535.function_extensions import FilterFunction
 
 
 class Match(FilterFunction):
-    """A type-aware implementation of the standard `match` function."""
+    """The standard `match` function."""
 
     arg_types = [ExpressionType.VALUE, ExpressionType.VALUE]
     return_type = ExpressionType.LOGICAL

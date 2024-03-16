@@ -12,14 +12,14 @@ from jsonpath_rfc9535.tokens import TokenType
 @dataclasses.dataclass
 class Case:
     description: str
-    path: str
+    query: str
     want: List[Token]
 
 
 TEST_CASES = [
     Case(
         description="basic shorthand name",
-        path="$.foo.bar",
+        query="$.foo.bar",
         want=[
             Token(TokenType.ROOT, "$", 0, "$.foo.bar"),
             Token(TokenType.PROPERTY, "foo", 2, "$.foo.bar"),
@@ -29,7 +29,7 @@ TEST_CASES = [
     ),
     Case(
         description="bracketed name",
-        path="$['foo']['bar']",
+        query="$['foo']['bar']",
         want=[
             Token(TokenType.ROOT, "$", 0, "$['foo']['bar']"),
             Token(TokenType.LBRACKET, "[", 1, "$['foo']['bar']"),
@@ -43,7 +43,7 @@ TEST_CASES = [
     ),
     Case(
         description="basic index",
-        path="$.foo[1]",
+        query="$.foo[1]",
         want=[
             Token(TokenType.ROOT, "$", 0, "$.foo[1]"),
             Token(TokenType.PROPERTY, "foo", 2, "$.foo[1]"),
@@ -55,14 +55,14 @@ TEST_CASES = [
     ),
     Case(
         description="missing root selector",
-        path="foo.bar",
+        query="foo.bar",
         want=[
             Token(TokenType.ERROR, "expected '$', found 'f'", 0, "foo.bar"),
         ],
     ),
     Case(
         description="root property selector without dot",
-        path="$foo",
+        query="$foo",
         want=[
             Token(TokenType.ROOT, "$", 0, "$foo"),
             Token(
@@ -75,7 +75,7 @@ TEST_CASES = [
     ),
     Case(
         description="whitespace after root",
-        path="$ .foo.bar",
+        query="$ .foo.bar",
         want=[
             Token(TokenType.ROOT, "$", 0, "$ .foo.bar"),
             Token(TokenType.PROPERTY, "foo", 3, "$ .foo.bar"),
@@ -85,7 +85,7 @@ TEST_CASES = [
     ),
     Case(
         description="whitespace before dot property",
-        path="$. foo.bar",
+        query="$. foo.bar",
         want=[
             Token(TokenType.ROOT, "$", 0, "$. foo.bar"),
             Token(TokenType.ERROR, "unexpected whitespace after dot", 3, "$. foo.bar"),
@@ -93,7 +93,7 @@ TEST_CASES = [
     ),
     Case(
         description="whitespace after dot property",
-        path="$.foo .bar",
+        query="$.foo .bar",
         want=[
             Token(TokenType.ROOT, "$", 0, "$.foo .bar"),
             Token(TokenType.PROPERTY, "foo", 2, "$.foo .bar"),
@@ -103,7 +103,7 @@ TEST_CASES = [
     ),
     Case(
         description="basic dot wild",
-        path="$.foo.*",
+        query="$.foo.*",
         want=[
             Token(TokenType.ROOT, "$", 0, "$.foo.*"),
             Token(TokenType.PROPERTY, "foo", 2, "$.foo.*"),
@@ -113,7 +113,7 @@ TEST_CASES = [
     ),
     Case(
         description="basic recurse",
-        path="$..foo",
+        query="$..foo",
         want=[
             Token(TokenType.ROOT, "$", 0, "$..foo"),
             Token(TokenType.DOUBLE_DOT, "..", 1, "$..foo"),
@@ -123,7 +123,7 @@ TEST_CASES = [
     ),
     Case(
         description="basic recurse with trailing dot",
-        path="$...foo",
+        query="$...foo",
         want=[
             Token(TokenType.ROOT, "$", 0, "$...foo"),
             Token(TokenType.DOUBLE_DOT, "..", 1, "$...foo"),
@@ -137,7 +137,7 @@ TEST_CASES = [
     ),
     Case(
         description="erroneous double recurse",
-        path="$....foo",
+        query="$....foo",
         want=[
             Token(TokenType.ROOT, "$", 0, "$....foo"),
             Token(TokenType.DOUBLE_DOT, "..", 1, "$....foo"),
@@ -151,7 +151,7 @@ TEST_CASES = [
     ),
     Case(
         description="bracketed name selector, double quotes",
-        path='$.foo["bar"]',
+        query='$.foo["bar"]',
         want=[
             Token(TokenType.ROOT, "$", 0, '$.foo["bar"]'),
             Token(TokenType.PROPERTY, "foo", 2, '$.foo["bar"]'),
@@ -163,7 +163,7 @@ TEST_CASES = [
     ),
     Case(
         description="bracketed name selector, single quotes",
-        path="$.foo['bar']",
+        query="$.foo['bar']",
         want=[
             Token(TokenType.ROOT, "$", 0, "$.foo['bar']"),
             Token(TokenType.PROPERTY, "foo", 2, "$.foo['bar']"),
@@ -175,7 +175,7 @@ TEST_CASES = [
     ),
     Case(
         description="multiple selectors",
-        path="$.foo['bar', 123, *]",
+        query="$.foo['bar', 123, *]",
         want=[
             Token(TokenType.ROOT, "$", 0, "$.foo['bar', 123, *]"),
             Token(TokenType.PROPERTY, "foo", 2, "$.foo['bar', 123, *]"),
@@ -191,7 +191,7 @@ TEST_CASES = [
     ),
     Case(
         description="slice",
-        path="$.foo[1:3]",
+        query="$.foo[1:3]",
         want=[
             Token(TokenType.ROOT, "$", 0, "$.foo[1:3]"),
             Token(TokenType.PROPERTY, "foo", 2, "$.foo[1:3]"),
@@ -205,7 +205,7 @@ TEST_CASES = [
     ),
     Case(
         description="filter",
-        path="$.foo[?@.bar]",
+        query="$.foo[?@.bar]",
         want=[
             Token(TokenType.ROOT, "$", 0, "$.foo[?@.bar]"),
             Token(TokenType.PROPERTY, "foo", 2, "$.foo[?@.bar]"),
@@ -219,7 +219,7 @@ TEST_CASES = [
     ),
     Case(
         description="filter, parenthesized expression",
-        path="$.foo[?(@.bar)]",
+        query="$.foo[?(@.bar)]",
         want=[
             Token(TokenType.ROOT, "$", 0, "$.foo[?(@.bar)]"),
             Token(TokenType.PROPERTY, "foo", 2, "$.foo[?(@.bar)]"),
@@ -235,7 +235,7 @@ TEST_CASES = [
     ),
     Case(
         description="two filters",
-        path="$.foo[?@.bar, ?@.baz]",
+        query="$.foo[?@.bar, ?@.baz]",
         want=[
             Token(TokenType.ROOT, "$", 0, "$.foo[?@.bar, ?@.baz]"),
             Token(TokenType.PROPERTY, "foo", 2, "$.foo[?@.bar, ?@.baz]"),
@@ -253,7 +253,7 @@ TEST_CASES = [
     ),
     Case(
         description="filter, function",
-        path="$[?count(@.foo)>2]",
+        query="$[?count(@.foo)>2]",
         want=[
             Token(TokenType.ROOT, "$", 0, "$[?count(@.foo)>2]"),
             Token(TokenType.LBRACKET, "[", 1, "$[?count(@.foo)>2]"),
@@ -270,7 +270,7 @@ TEST_CASES = [
     ),
     Case(
         description="filter, function with two args",
-        path="$[?count(@.foo, 1)>2]",
+        query="$[?count(@.foo, 1)>2]",
         want=[
             Token(TokenType.ROOT, "$", 0, "$[?count(@.foo, 1)>2]"),
             Token(TokenType.LBRACKET, "[", 1, "$[?count(@.foo, 1)>2]"),
@@ -289,7 +289,7 @@ TEST_CASES = [
     ),
     Case(
         description="filter, parenthesized function",
-        path="$[?(count(@.foo)>2)]",
+        query="$[?(count(@.foo)>2)]",
         want=[
             Token(TokenType.ROOT, "$", 0, "$[?(count(@.foo)>2)]"),
             Token(TokenType.LBRACKET, "[", 1, "$[?(count(@.foo)>2)]"),
@@ -308,7 +308,7 @@ TEST_CASES = [
     ),
     Case(
         description="filter, parenthesized function argument",
-        path="$[?(count((@.foo),1)>2)]",
+        query="$[?(count((@.foo),1)>2)]",
         want=[
             Token(TokenType.ROOT, "$", 0, "$[?(count((@.foo),1)>2)]"),
             Token(TokenType.LBRACKET, "[", 1, "$[?(count((@.foo),1)>2)]"),
@@ -331,7 +331,7 @@ TEST_CASES = [
     ),
     Case(
         description="filter, nested",
-        path="$[?@[?@>1]]",
+        query="$[?@[?@>1]]",
         want=[
             Token(TokenType.ROOT, "$", 0, "$[?@[?@>1]]"),
             Token(TokenType.LBRACKET, "[", 1, "$[?@[?@>1]]"),
@@ -349,7 +349,7 @@ TEST_CASES = [
     ),
     Case(
         description="filter, nested brackets",
-        path="$[?@[?@[1]>1]]",
+        query="$[?@[?@[1]>1]]",
         want=[
             Token(TokenType.ROOT, "$", 0, "$[?@[?@[1]>1]]"),
             Token(TokenType.LBRACKET, "[", 1, "$[?@[?@[1]>1]]"),
@@ -370,7 +370,7 @@ TEST_CASES = [
     ),
     Case(
         description="function",
-        path="$[?foo()]",
+        query="$[?foo()]",
         want=[
             Token(TokenType.ROOT, "$", 0, "$[?foo()]"),
             Token(TokenType.LBRACKET, "[", 1, "$[?foo()]"),
@@ -383,7 +383,7 @@ TEST_CASES = [
     ),
     Case(
         description="function",
-        path="$[?foo()]",
+        query="$[?foo()]",
         want=[
             Token(TokenType.ROOT, "$", 0, "$[?foo()]"),
             Token(TokenType.LBRACKET, "[", 1, "$[?foo()]"),
@@ -396,7 +396,7 @@ TEST_CASES = [
     ),
     Case(
         description="function, int literal",
-        path="$[?foo(42)]",
+        query="$[?foo(42)]",
         want=[
             Token(TokenType.ROOT, "$", 0, "$[?foo(42)]"),
             Token(TokenType.LBRACKET, "[", 1, "$[?foo(42)]"),
@@ -410,7 +410,7 @@ TEST_CASES = [
     ),
     Case(
         description="function, two int args",
-        path="$[?foo(42, -7)]",
+        query="$[?foo(42, -7)]",
         want=[
             Token(TokenType.ROOT, "$", 0, "$[?foo(42, -7)]"),
             Token(TokenType.LBRACKET, "[", 1, "$[?foo(42, -7)]"),
@@ -426,7 +426,7 @@ TEST_CASES = [
     ),
     Case(
         description="boolean literals",
-        path="$[?true==false]",
+        query="$[?true==false]",
         want=[
             Token(TokenType.ROOT, "$", 0, "$[?true==false]"),
             Token(TokenType.LBRACKET, "[", 1, "$[?true==false]"),
@@ -440,7 +440,7 @@ TEST_CASES = [
     ),
     Case(
         description="logical and",
-        path="$[?true && false]",
+        query="$[?true && false]",
         want=[
             Token(TokenType.ROOT, "$", 0, "$[?true && false]"),
             Token(TokenType.LBRACKET, "[", 1, "$[?true && false]"),
@@ -454,7 +454,7 @@ TEST_CASES = [
     ),
     Case(
         description="float",
-        path="$[?@.foo > 42.7]",
+        query="$[?@.foo > 42.7]",
         want=[
             Token(TokenType.ROOT, "$", 0, "$[?@.foo > 42.7]"),
             Token(TokenType.LBRACKET, "[", 1, "$[?@.foo > 42.7]"),
@@ -472,6 +472,6 @@ TEST_CASES = [
 
 @pytest.mark.parametrize("case", TEST_CASES, ids=operator.attrgetter("description"))
 def test_lexer(case: Case) -> None:
-    lexer, tokens = lex(case.path)
+    lexer, tokens = lex(case.query)
     lexer.run()
     assert lexer.tokens == case.want

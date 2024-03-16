@@ -1,20 +1,20 @@
-from .environment import JSONLikeData
 from .environment import JSONPathEnvironment
+from .environment import JSONValue
 from .exceptions import JSONPathError
 from .exceptions import JSONPathIndexError
 from .exceptions import JSONPathNameError
 from .exceptions import JSONPathRecursionError
 from .exceptions import JSONPathSyntaxError
 from .exceptions import JSONPathTypeError
-from .expressions import NOTHING
+from .filter_expressions import NOTHING
 from .lex import Lexer
 from .node import JSONPathNode
 from .node import JSONPathNodeList
 from .parse import Parser
-from .path import JSONPath
+from .query import JSONPathQuery
 
 __all__ = (
-    "JSONLikeData",
+    "JSONValue",
     "JSONPathEnvironment",
     "JSONPathError",
     "JSONPathIndexError",
@@ -27,12 +27,14 @@ __all__ = (
     "JSONPathNode",
     "JSONPathNodeList",
     "Parser",
-    "JSONPath",
+    "JSONPathQuery",
+    "find",
+    "finditer",
+    "compile",
 )
 
 # For convenience
 DEFAULT_ENV = JSONPathEnvironment()
 compile = DEFAULT_ENV.compile  # noqa: A001
-findall = DEFAULT_ENV.findall
 finditer = DEFAULT_ENV.finditer
-query = DEFAULT_ENV.query
+find = DEFAULT_ENV.find
