@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 import os
 import random
 import sys
@@ -69,6 +70,27 @@ class AuxNode:
         _visit(root)
         return root
 
+    @staticmethod
+    def collections(data: JSONLikeData) -> AuxNode:
+        def _visit(node: AuxNode, depth: int = 0) -> None:
+            if isinstance(node.value, dict):
+                for val in node.value.values():
+                    if isinstance(val, (list, dict)):
+                        _node = AuxNode(depth + 1, val)
+                        _visit(_node, depth + 1)
+                        node.children.append(_node)
+
+            elif isinstance(node.value, list):
+                for val in node.value:
+                    if isinstance(val, (list, dict)):
+                        _node = AuxNode(depth + 1, val)
+                        _visit(_node, depth + 1)
+                        node.children.append(_node)
+
+        root = AuxNode(0, data)
+        _visit(root)
+        return root
+
 
 def pptree(
     node: AuxNode,
@@ -115,13 +137,14 @@ def nondeterministic_visit(root: AuxNode) -> Iterable[AuxNode]:
     while queue:
         _node = queue.popleft()
         yield _node
+        # Visit child nodes now or queue them for later?
+        visit_children = random.choice([True, False])
         for child in _node.children:
-            # Queue the child node or visit it now?
-            if random.choice([True, False]):  # noqa: S311
-                queue.append(child)
-            else:
+            if visit_children:
                 yield child
                 queue.extend(child.children)
+            else:
+                queue.append(child)
 
 
 def get_perms(root: AuxNode) -> List[Tuple[AuxNode, ...]]:
@@ -130,22 +153,43 @@ def get_perms(root: AuxNode) -> List[Tuple[AuxNode, ...]]:
     return sorted(perms, key=lambda t: str(t))
 
 
-def pp_json_path_data(data: JSONLikeData) -> None:
+def pp_json_path_perms(data: JSONLikeData) -> None:
+    print("Input data")
+    print(f"\033[92m{data}\033[0m")
     aux_tree = AuxNode.from_(data)
+    print("\nTree view")
     pptree(aux_tree)
 
-    print("\nPre order\n")
+    print("\nPre order")
     print(", ".join(str(n) for n in pre_order_visit(aux_tree)))
 
-    print("\nLevel order\n")
+    print("\nLevel order")
     print(", ".join(str(n) for n in breadth_first_visit(aux_tree)))
 
-    print("\nNondeterministic order\n")
+    print("\nNondeterministic order")
+    for perm in get_perms(aux_tree):
+        print(", ".join(str(node) for node in perm))
+
+    print("\n---\n\nCollections only")
+    aux_tree = AuxNode.collections(data)
+    pptree(aux_tree)
+
+    print("\nPre order")
+    print(", ".join(str(n) for n in pre_order_visit(aux_tree)))
+
+    print("\nLevel order")
+    print(", ".join(str(n) for n in breadth_first_visit(aux_tree)))
+
+    print("\nNondeterministic order")
     for perm in get_perms(aux_tree):
         print(", ".join(str(node) for node in perm))
 
 
 if __name__ == "__main__":
-    # basic, descendant segment, name shorthand
-    data = {"o": [{"a": "b"}, {"a": "c"}]}
-    pp_json_path_data(data)
+    if len(sys.argv) < 2:  # noqa: PLR2004
+        print("error: no data to process")
+        print(f"usage: {sys.argv[0]} <JSON string>")
+        sys.exit(1)
+
+    data = json.loads(sys.argv[1])
+    pp_json_path_perms(data)

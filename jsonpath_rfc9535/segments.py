@@ -142,9 +142,10 @@ class JSONPathRecursiveDescentSegment(JSONPathSegment):
         while queue:
             _node = queue.popleft()
             yield _node
+            # Visit child nodes now or queue them for later?
+            visit_children = random.choice([True, False])  # noqa: S311
             for child in _children(_node):
-                # Queue the child node or visit it now?
-                if random.choice([True, False]):  # noqa: S311
+                if visit_children:
                     queue.append(child)
                 else:
                     yield child
