@@ -32,7 +32,7 @@ NOTE: If you're coming from [Python JSONPath](https://github.com/jg-rp/python-js
 
 Apply JSONPath expression _path_ to _data_. _data_ should arbitrary, possible nested, Python dictionaries, lists, strings, integers, floats, booleans or `None`, as you would get from [`json.load()`](https://docs.python.org/3/library/json.html#json.load).
 
-A list of `JSONPathNode` instances is returned, one for each value in _data_ matched by _path_. The returned list will be empty if there were no matches.
+A list of `JSONPathNode` instances is returned, one node for each value in _data_ matched by _path_. The returned list will be empty if there were no matches.
 
 Each `JSONPathNode` has:
 
