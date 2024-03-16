@@ -29,6 +29,9 @@ Documentation = "https://jg-rp.github.io/python-jsonpath-rfc9535/"
 Issues = "https://github.com/jg-rp/python-jsonpath-rfc9535/issues"
 Source = "https://github.com/jg-rp/python-jsonpath-rfc9535"
 
+[project.scripts]
+jsonpath-rfc9535 = "jsonpath_rfc9535.cli:main"
+
 [tool.hatch.version]
 path = "jsonpath_rfc9535/__about__.py"
 
