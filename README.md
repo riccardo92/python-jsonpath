@@ -6,7 +6,7 @@ We follow <a href="https://datatracker.ietf.org/doc/html/rfc9535">RFC 9535</a> s
 
 <p align="center">
   <a href="https://github.com/jg-rp/python-jsonpath-rfc9535/blob/main/LICENSE.txt">
-    <img src="https://img.shields.io/pypi/l/jsonpath-rfc9535?style=flat-square" alt="License">
+    <img src="https://img.shields.io/pypi/l/jsonpath-rfc9535.svg?style=flat-square" alt="License">
   </a>
   <a href="https://github.com/jg-rp/python-jsonpath-rfc9535/actions">
     <img src="https://img.shields.io/github/actions/workflow/status/jg-rp/python-jsonpath-rfc9535/tests.yaml?branch=main&label=tests&style=flat-square" alt="Tests">
@@ -97,7 +97,7 @@ products = jsonpath.find("$..products.*", data).values()
 ## Links
 
 - Change log: https://github.com/jg-rp/python-jsonpath-rfc9535/blob/main/CHANGELOG.md
-- PyPi: [TODO](https://pypi.org/project/jsonpath-rfc9535)
+- PyPi: https://pypi.org/project/jsonpath-rfc9535
 - Source code: https://github.com/jg-rp/python-jsonpath-rfc9535
 - Issue tracker: https://github.com/jg-rp/python-jsonpath-rfc9535/issues
 
