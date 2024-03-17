@@ -202,7 +202,3 @@ A `JSONPathQuery` has a `finditer(value)` method too, and `find(value)` is an al
 ## License
 
 `python-jsonpath-rfc9535` is distributed under the terms of the [MIT](https://spdx.org/licenses/MIT.html) license.
-
-```
-
-```
