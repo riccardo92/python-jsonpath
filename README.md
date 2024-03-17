@@ -1,30 +1,114 @@
 # RFC 9535 JSONPath: Query Expressions for JSON in Python
 
-We follow [RFC 9535](https://datatracker.ietf.org/doc/html/rfc9535) strictly and test against the [JSONPath Compliance Test Suite](https://github.com/jsonpath-standard/jsonpath-compliance-test-suite).
+<h1 align="center"># RFC 9535 JSONPath: Query Expressions for JSON in Python</h1>
 
-See also [Python JSONPath](https://github.com/jg-rp/python-jsonpath), which also follows RFC 9535, but with additional features and customization options.
+<p align="center">
+We follow <a href="https://datatracker.ietf.org/doc/html/rfc9535">RFC 9535</a> strictly and test against the <a href="https://github.com/jsonpath-standard/jsonpath-compliance-test-suite">JSONPath Compliance Test Suite</a>.
+</p>
+
+<p align="center">
+  <a href="https://github.com/jg-rp/python-jsonpath-rfc9535/blob/main/LICENSE.txt">
+    <img src="https://img.shields.io/pypi/l/jsonpath-rfc9535?style=flat-square" alt="License">
+  </a>
+  <a href="https://github.com/jg-rp/python-jsonpath-rfc9535/actions">
+    <img src="https://img.shields.io/github/actions/workflow/status/jg-rp/python-jsonpath-rfc9535/tests.yaml?branch=main&label=tests&style=flat-square" alt="Tests">
+  </a>
+  <br>
+  <a href="https://pypi.org/project/jsonpath-rfc9535">
+    <img src="https://img.shields.io/pypi/v/jsonpath-rfc9535.svg?style=flat-square" alt="PyPi - Version">
+  </a>
+  <a href="https://pypi.org/project/jsonpath-rfc9535">
+    <img src="https://img.shields.io/pypi/pyversions/jsonpath-rfc9535.svg?style=flat-square" alt="Python versions">
+  </a>
+</p>
 
 ---
 
 **Table of Contents**
 
 - [Install](#install)
+- [Example](#example)
 - [Links](#links)
-- [Usage](#usage)
+- [Related projects](#related-projects)
+- [API](#api)
 - [License](#license)
 
 ## Install
 
-TODO:
+Install Python JSONPath RFC 9535 using [pip](https://pip.pypa.io/en/stable/getting-started/):
+
+```
+pip install jsonpath-rfc9535
+```
+
+Or [Pipenv](https://pipenv.pypa.io/en/latest/):
+
+```
+pipenv install -u jsonpath-rfc9535
+```
+
+## Example
+
+```python
+import jsonpath_rfc9535 as jsonpath
+
+data = {
+    "users": [
+        {"name": "Sue", "score": 100},
+        {"name": "Sally", "score": 84, "admin": False},
+        {"name": "John", "score": 86, "admin": True},
+        {"name": "Jane", "score": 55},
+    ],
+    "moderator": "John",
+}
+
+for node in jsonpath.find("$.users[?@.score > 85]", data):
+    print(node.value)
+
+# {'name': 'Sue', 'score': 100}
+# {'name': 'John', 'score': 86, 'admin': True}
+```
+
+Or, reading JSON data from a file:
+
+```python
+import json
+import jsonpath_rfc9535 as jsonpath
+
+with open("/path/to/some.json", encoding="utf-8") as fd:
+    data = json.load(fd)
+
+nodes = jsonpath.find("$.some.query", data)
+values = nodes.values()
+# ...
+```
+
+You could read data from a YAML formatted file too. If you have [PyYaml](https://pyyaml.org/wiki/PyYAML) installed:
+
+```python
+import jsonpath_rfc9535 as jsonpath
+import yaml
+
+with open("some.yaml") as fd:
+    data = yaml.safe_load(fd)
+
+products = jsonpath.find("$..products.*", data).values()
+# ...
+```
 
 ## Links
 
 - Change log: https://github.com/jg-rp/python-jsonpath-rfc9535/blob/main/CHANGELOG.md
-- PyPi: TODO
+- PyPi: [TODO](https://pypi.org/project/jsonpath-rfc9535)
 - Source code: https://github.com/jg-rp/python-jsonpath-rfc9535
 - Issue tracker: https://github.com/jg-rp/python-jsonpath-rfc9535/issues
 
-## Usage
+## Related projects
+
+- [Python JSONPath](https://github.com/jg-rp/python-jsonpath) - Another Python package implementing JSONPath, but with additional features and customization options.
+- [JSON P3](https://github.com/jg-rp/json-p3) - RFC 9535 implemented in TypeScript.
+
+## API
 
 ### find
 
@@ -39,13 +123,6 @@ Each `JSONPathNode` has:
 - a `value` property, which is the JSON-like value associated with the node.
 - a `location` property, which is a tuple of property names and array/list indexes that were required to reach the node's value in the target JSON document.
 - a `path()` method, which returns the normalized path to the node in the target JSON document.
-
-The returned list is a subclass of `list` with some helper methods.
-
-- `values()` returns a list of values, one for each node.
-- `items()` returns a list of `(normalized path, value)` tuples, one tuple for each node in the list.
-
-**Example:**
 
 ```python
 import jsonpath_rfc9535 as jsonpath
@@ -66,6 +143,11 @@ for node in jsonpath.find("$.users[?@.score > 85]", value):
 # {'name': 'Sue', 'score': 100} at '$['users'][0]'
 # {'name': 'John', 'score': 86, 'admin': True} at '$['users'][1]'
 ```
+
+`JSONPathNodeList` is a subclass of `list` with some helper methods.
+
+- `values()` returns a list of values, one for each node.
+- `items()` returns a list of `(normalized path, value)` tuples.
 
 ### find_one
 
