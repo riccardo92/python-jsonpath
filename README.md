@@ -41,7 +41,7 @@ Each `JSONPathNode` has:
 The returned list is a subclass of `list` with some helper methods.
 
 - `values()` returns a list of values, one for each node.
-- `values_or_singular()` returns a scalar value if the list has exactly one node, or a list of values otherwise.
+- `items()` returns a list of `(normalized path, value)` tuples, one tuple for each node in the list.
 
 **Example:**
 
@@ -65,10 +65,56 @@ for node in jsonpath.find("$.users[?@.score > 85]", value):
 # {'name': 'John', 'score': 86, 'admin': True} at '$['users'][1]'
 ```
 
-### finditer(query, value)
+### `finditer(query, value)`
 
 `finditer()` accepts the same arguments as [`find()`](#findquery-value), but returns an iterator over `JSONPathNode` instances rather than a list. This could be useful if you're expecting a large number of results that you don't want to load into memory all at once.
+
+### `find_one(query, value)`
+
+`find_one()` accepts the same arguments as [`find()`](#findquery-value), but returns the first available `JSONPathNode`, or `None` if there were no matches.
+
+`find_one()` is equivalent to:
+
+```python
+def find_one(query, value):
+    try:
+        return next(iter(jsonpath.finditer(query, value)))
+    except StopIteration:
+        return None
+```
+
+### `compile(query)`
+
+`find(query, value)` is a convenience function for `JSONPathEnvironment().compile(query).apply(value)`. Use `compile(query)` to obtain a `JSONPathQuery` instance which can be applied to difference JSON-like values repeatedly.
+
+```python
+import jsonpath_rfc9535 as jsonpath
+
+value = {
+    "users": [
+        {"name": "Sue", "score": 100},
+        {"name": "John", "score": 86, "admin": True},
+        {"name": "Sally", "score": 84, "admin": False},
+        {"name": "Jane", "score": 55},
+    ],
+    "moderator": "John",
+}
+
+query = jsonpath.compile("$.users[?@.score > 85]")
+
+for node in query.apply(value):
+    print(f"{node.value} at '{node.path()}'")
+
+# {'name': 'Sue', 'score': 100} at '$['users'][0]'
+# {'name': 'John', 'score': 86, 'admin': True} at '$['users'][1]'
+```
+
+A `JSONPathQuery` has a `finditer(value)` method too, and `find(value)` is an alias for `apply(value)`.
 
 ## License
 
 `python-jsonpath-rfc9535` is distributed under the terms of the [MIT](https://spdx.org/licenses/MIT.html) license.
+
+```
+
+```

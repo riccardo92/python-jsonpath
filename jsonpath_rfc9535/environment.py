@@ -144,6 +144,28 @@ class JSONPathEnvironment:
         """
         return self.compile(query).find(value)
 
+    def find_one(
+        self,
+        query: str,
+        value: JSONValue,
+    ) -> Optional[JSONPathNode]:
+        """Return the first available node from applying _query_ to _value_.
+
+        Arguments:
+            query: A JSONPath expression.
+            value: JSON-like data to query, as you'd get from `json.load`.
+
+        Returns:
+            The first available `JSONPathNode` instance, or `None` if there
+                are no matches.
+
+        Raises:
+            JSONPathSyntaxError: If the query is invalid.
+            JSONPathTypeError: If a filter expression attempts to use types in
+                an incompatible way.
+        """
+        return self.compile(query).find_one(value)
+
     def setup_function_extensions(self) -> None:
         """Initialize function extensions."""
         self.function_extensions["length"] = function_extensions.Length()

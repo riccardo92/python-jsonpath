@@ -43,7 +43,7 @@ class JSONPathNode:
         )
 
     def __str__(self) -> str:
-        return f"JSONPathNode({self.path()})"
+        return f"JSONPathNode({self.path()!r})"
 
 
 class JSONPathNodeList(List[JSONPathNode]):
@@ -56,11 +56,9 @@ class JSONPathNodeList(List[JSONPathNode]):
         """Return the values from this node list."""
         return [node.value for node in self]
 
-    def values_or_singular(self) -> object:
-        """Return values from this node list, or a single value if there's one node."""
-        if len(self) == 1:
-            return self[0].value
-        return [node.value for node in self]
+    def items(self) -> List[Tuple[str, object]]:
+        """Return a list of (path, value) pairs, one for each node in the list."""
+        return [(node.path(), node.value) for node in self]
 
     def empty(self) -> bool:
         """Return `True` if this node list is empty."""

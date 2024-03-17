@@ -29,6 +29,7 @@ __all__ = (
     "Parser",
     "JSONPathQuery",
     "find",
+    "find_one",
     "finditer",
     "compile",
 )
@@ -38,3 +39,4 @@ DEFAULT_ENV = JSONPathEnvironment()
 compile = DEFAULT_ENV.compile  # noqa: A001
 finditer = DEFAULT_ENV.finditer
 find = DEFAULT_ENV.find
+find_one = DEFAULT_ENV.find_one

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 from typing import Iterable
+from typing import Optional
 from typing import Tuple
 
 from .node import JSONPathNode
@@ -96,6 +97,28 @@ class JSONPathQuery:
                 an incompatible way.
         """
         return JSONPathNodeList(self.finditer(value))
+
+    apply = find
+
+    def find_one(self, value: JSONValue) -> Optional[JSONPathNode]:
+        """Return the first node from applying this query to _value_.
+
+        Arguments:
+            value: JSON-like data to query, as you'd get from `json.load`.
+
+        Returns:
+            The first available `JSONPathNode` instance, or `None` if there
+                are no matches.
+
+        Raises:
+            JSONPathSyntaxError: If the query is invalid.
+            JSONPathTypeError: If a filter expression attempts to use types in
+                an incompatible way.
+        """
+        try:
+            return next(iter(self.finditer(value)))
+        except StopIteration:
+            return None
 
     def singular_query(self) -> bool:
         """Return `True` if this JSONPath expression is a singular query."""
