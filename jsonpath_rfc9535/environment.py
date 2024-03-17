@@ -19,9 +19,9 @@ from . import function_extensions
 from .exceptions import JSONPathNameError
 from .exceptions import JSONPathTypeError
 from .filter_expressions import ComparisonExpression
+from .filter_expressions import FilterExpressionLiteral
 from .filter_expressions import FilterQuery
 from .filter_expressions import FunctionExtension
-from .filter_expressions import JSONPathLiteral
 from .filter_expressions import LogicalExpression
 from .function_extensions import ExpressionType
 from .function_extensions import FilterFunction
@@ -185,7 +185,7 @@ class JSONPathEnvironment:
             arg = args[idx]
             if typ == ExpressionType.VALUE:
                 if not (
-                    isinstance(arg, JSONPathLiteral)
+                    isinstance(arg, FilterExpressionLiteral)
                     or (isinstance(arg, FilterQuery) and arg.query.singular_query())
                     or (self._function_return_type(arg) == ExpressionType.VALUE)
                 ):

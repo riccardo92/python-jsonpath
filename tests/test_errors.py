@@ -1,5 +1,7 @@
+import operator
 from typing import Any
 from typing import List
+from typing import NamedTuple
 
 import pytest
 
@@ -60,3 +62,33 @@ def test_low_recursion_limit() -> None:
 
     with pytest.raises(JSONPathRecursionError):
         env.find(query, data)
+
+
+class FilterLiteralTestCase(NamedTuple):
+    description: str
+    query: str
+
+
+BAD_FILTER_LITERAL_TEST_CASES: List[FilterLiteralTestCase] = [
+    FilterLiteralTestCase("just true", "$[?true]"),
+    FilterLiteralTestCase("just string", "$[?'foo']"),
+    FilterLiteralTestCase("just int", "$[?2]"),
+    FilterLiteralTestCase("just float", "$[?2.2]"),
+    FilterLiteralTestCase("just null", "$[?null]"),
+    FilterLiteralTestCase("literal and literal", "$[?true and false]"),
+    FilterLiteralTestCase("literal or literal", "$[?true or false]"),
+    FilterLiteralTestCase("comparison and literal", "$[?true == false and false]"),
+    FilterLiteralTestCase("comparison or literal", "$[?true == false or false]"),
+    FilterLiteralTestCase("literal and comparison", "$[?true and true == false]"),
+    FilterLiteralTestCase("literal or comparison", "$[?false or true == false]"),
+]
+
+
+@pytest.mark.parametrize(
+    "case", BAD_FILTER_LITERAL_TEST_CASES, ids=operator.attrgetter("description")
+)
+def test_filter_literals_must_be_compared(
+    env: JSONPathEnvironment, case: FilterLiteralTestCase
+) -> None:
+    with pytest.raises(JSONPathSyntaxError):
+        env.compile(case.query)

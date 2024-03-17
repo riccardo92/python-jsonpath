@@ -21,6 +21,7 @@ from .filter_expressions import BooleanLiteral
 from .filter_expressions import ComparisonExpression
 from .filter_expressions import Expression
 from .filter_expressions import FilterExpression
+from .filter_expressions import FilterExpressionLiteral
 from .filter_expressions import FilterQuery
 from .filter_expressions import FloatLiteral
 from .filter_expressions import FunctionExtension
@@ -396,6 +397,13 @@ class Parser:
                     f"result of {expr.name}() must be compared", token=tok
                 )
 
+        if isinstance(expr, FilterExpressionLiteral):
+            raise JSONPathSyntaxError(
+                "filter expression literals outside of "
+                "function expressions must be compared",
+                token=expr.token,
+            )
+
         return Filter(
             env=self.env,
             token=tok,
@@ -444,7 +452,19 @@ class Parser:
             self._raise_for_non_comparable_function(right, tok)
             return ComparisonExpression(tok, left, operator, right)
 
-        # TODO: check for valid basic expressions
+        if isinstance(left, FilterExpressionLiteral):
+            raise JSONPathSyntaxError(
+                "filter expression literals outside of "
+                "function expressions must be compared",
+                token=left.token,
+            )
+        if isinstance(right, FilterExpressionLiteral):
+            raise JSONPathSyntaxError(
+                "filter expression literals outside of "
+                "function expressions must be compared",
+                token=right.token,
+            )
+
         return LogicalExpression(tok, left, operator, right)
 
     def parse_grouped_expression(self, stream: TokenStream) -> Expression:

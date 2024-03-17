@@ -70,7 +70,7 @@ class FilterExpression(Expression):
 LITERAL_T = TypeVar("LITERAL_T")
 
 
-class JSONPathLiteral(Expression, Generic[LITERAL_T]):
+class FilterExpressionLiteral(Expression, Generic[LITERAL_T]):
     """Base class for filter expression literals."""
 
     __slots__ = ("value",)
@@ -93,13 +93,13 @@ class JSONPathLiteral(Expression, Generic[LITERAL_T]):
         return self.value
 
 
-class BooleanLiteral(JSONPathLiteral[bool]):
+class BooleanLiteral(FilterExpressionLiteral[bool]):
     """A Boolean `true` or `false`."""
 
     __slots__ = ()
 
 
-class StringLiteral(JSONPathLiteral[str]):
+class StringLiteral(FilterExpressionLiteral[str]):
     """A string literal."""
 
     __slots__ = ()
@@ -108,19 +108,19 @@ class StringLiteral(JSONPathLiteral[str]):
         return json.dumps(self.value)
 
 
-class IntegerLiteral(JSONPathLiteral[int]):
+class IntegerLiteral(FilterExpressionLiteral[int]):
     """An integer literal."""
 
     __slots__ = ()
 
 
-class FloatLiteral(JSONPathLiteral[float]):
+class FloatLiteral(FilterExpressionLiteral[float]):
     """A float literal."""
 
     __slots__ = ()
 
 
-class NullLiteral(JSONPathLiteral[None]):
+class NullLiteral(FilterExpressionLiteral[None]):
     """A null literal."""
 
     __slots__ = ()
