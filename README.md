@@ -26,7 +26,9 @@ TODO:
 
 ## Usage
 
-### `find(query, value)`
+### find
+
+`find(query: str, value: JSONValue) -> JSONPathNodeList`
 
 Apply JSONPath expression _query_ to _value_. _value_ should arbitrary, possible nested, Python dictionaries, lists, strings, integers, floats, Booleans or `None`, as you would get from [`json.load()`](https://docs.python.org/3/library/json.html#json.load).
 
@@ -65,11 +67,9 @@ for node in jsonpath.find("$.users[?@.score > 85]", value):
 # {'name': 'John', 'score': 86, 'admin': True} at '$['users'][1]'
 ```
 
-### `finditer(query, value)`
+### find_one
 
-`finditer()` accepts the same arguments as [`find()`](#findquery-value), but returns an iterator over `JSONPathNode` instances rather than a list. This could be useful if you're expecting a large number of results that you don't want to load into memory all at once.
-
-### `find_one(query, value)`
+`find_one(query: str, value: JSONValue) -> Optional[JSONPathNode]`
 
 `find_one()` accepts the same arguments as [`find()`](#findquery-value), but returns the first available `JSONPathNode`, or `None` if there were no matches.
 
@@ -83,7 +83,15 @@ def find_one(query, value):
         return None
 ```
 
-### `compile(query)`
+### finditer
+
+`finditer(query: str, value: JSONValue) -> Iterable[JSONPathNode]`
+
+`finditer()` accepts the same arguments as [`find()`](#findquery-value), but returns an iterator over `JSONPathNode` instances rather than a list. This could be useful if you're expecting a large number of results that you don't want to load into memory all at once.
+
+### compile
+
+`compile(query: str) -> JSONPathQuery`
 
 `find(query, value)` is a convenience function for `JSONPathEnvironment().compile(query).apply(value)`. Use `compile(query)` to obtain a `JSONPathQuery` instance which can be applied to difference JSON-like values repeatedly.
 
