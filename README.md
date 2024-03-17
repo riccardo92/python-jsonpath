@@ -1,6 +1,4 @@
-# RFC 9535 JSONPath: Query Expressions for JSON in Python
-
-<h1 align="center"># RFC 9535 JSONPath: Query Expressions for JSON in Python</h1>
+<h1 align="center">RFC 9535 JSONPath: Query Expressions for JSON in Python</h1>
 
 <p align="center">
 We follow <a href="https://datatracker.ietf.org/doc/html/rfc9535">RFC 9535</a> strictly and test against the <a href="https://github.com/jsonpath-standard/jsonpath-compliance-test-suite">JSONPath Compliance Test Suite</a>.
