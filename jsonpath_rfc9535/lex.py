@@ -42,7 +42,7 @@ class Lexer:
         """A running count of parentheses for each, possibly nested, function call.
         
         If the stack is empty, we are not in a function call. Remember that
-        function arguments can use arbitrarily nested in parentheses.
+        function arguments can be arbitrarily nested in parentheses.
         """
 
         self.tokens: List[Token] = []
