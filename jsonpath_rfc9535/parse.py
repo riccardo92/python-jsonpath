@@ -96,12 +96,6 @@ class Parser:
         ]
     )
 
-    PREFIX_OPERATORS = frozenset(
-        [
-            TokenType.NOT,
-        ]
-    )
-
     def __init__(self, *, env: JSONPathEnvironment) -> None:
         self.env = env
 
@@ -116,16 +110,6 @@ class Parser:
             TokenType.NULL: self.parse_nil,
             TokenType.ROOT: self.parse_root_path,
             TokenType.CURRENT: self.parse_self_path,
-            TokenType.SINGLE_QUOTE_STRING: self.parse_string_literal,
-            TokenType.TRUE: self.parse_boolean,
-        }
-
-        self.list_item_map: Dict[TokenType, Callable[[TokenStream], Expression]] = {
-            TokenType.FALSE: self.parse_boolean,
-            TokenType.FLOAT: self.parse_float_literal,
-            TokenType.INT: self.parse_integer_literal,
-            TokenType.NULL: self.parse_nil,
-            TokenType.DOUBLE_QUOTE_STRING: self.parse_string_literal,
             TokenType.SINGLE_QUOTE_STRING: self.parse_string_literal,
             TokenType.TRUE: self.parse_boolean,
         }
@@ -261,7 +245,7 @@ class Parser:
         )
 
     def parse_bracketed_selection(self, stream: TokenStream) -> List[JSONPathSelector]:  # noqa: PLR0912
-        """Parse a comma separated list JSONPath selectors from a stream of tokens."""
+        """Parse a comma separated list of JSONPath selectors."""
         tok = stream.next_token()  # Skip LBRACKET
         selectors: List[JSONPathSelector] = []
 
