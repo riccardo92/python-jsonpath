@@ -108,8 +108,8 @@ class Parser:
             TokenType.LPAREN: self.parse_grouped_expression,
             TokenType.NOT: self.parse_prefix_expression,
             TokenType.NULL: self.parse_nil,
-            TokenType.ROOT: self.parse_root_path,
-            TokenType.CURRENT: self.parse_self_path,
+            TokenType.ROOT: self.parse_root_query,
+            TokenType.CURRENT: self.parse_relative_query,
             TokenType.SINGLE_QUOTE_STRING: self.parse_string_literal,
             TokenType.TRUE: self.parse_boolean,
         }
@@ -123,17 +123,17 @@ class Parser:
             TokenType.FUNCTION: self.parse_function_extension,
             TokenType.INT: self.parse_integer_literal,
             TokenType.NULL: self.parse_nil,
-            TokenType.ROOT: self.parse_root_path,
-            TokenType.CURRENT: self.parse_self_path,
+            TokenType.ROOT: self.parse_root_query,
+            TokenType.CURRENT: self.parse_relative_query,
             TokenType.SINGLE_QUOTE_STRING: self.parse_string_literal,
             TokenType.TRUE: self.parse_boolean,
         }
 
     def parse(self, stream: TokenStream) -> Iterable[JSONPathSegment]:
-        """Parse a JSONPath from a stream of tokens."""
+        """Parse a JSONPath expression from a stream of tokens."""
         stream.expect(TokenType.ROOT)
         stream.next_token()
-        yield from self.parse_path(stream, in_filter=False)
+        yield from self.parse_query(stream, in_filter=False)
 
         if stream.current.type_ != TokenType.EOF:
             raise JSONPathSyntaxError(
@@ -141,13 +141,13 @@ class Parser:
                 token=stream.current,
             )
 
-    def parse_path(
+    def parse_query(
         self,
         stream: TokenStream,
         *,
         in_filter: bool = False,
     ) -> Iterable[JSONPathSegment]:
-        """Parse a top-level JSONPath, or one that is nested in a filter."""
+        """Parse a top-level JSONPath expression or a filter query."""
         while True:
             if stream.current.type_ == TokenType.DOUBLE_DOT:
                 tok = stream.next_token()
@@ -196,7 +196,7 @@ class Parser:
         return ()
 
     def parse_slice(self, stream: TokenStream) -> SliceSelector:
-        """Parse a slice JSONPath expression from a stream of tokens."""
+        """Parse a slice selector."""
         tok = stream.current
         start: Optional[int] = None
         stop: Optional[int] = None
@@ -417,23 +417,23 @@ class Parser:
         stream.expect(TokenType.RPAREN)
         return expr
 
-    def parse_root_path(self, stream: TokenStream) -> Expression:
+    def parse_root_query(self, stream: TokenStream) -> Expression:
         root = stream.next_token()
         assert root.type_ == TokenType.ROOT
         return RootFilterQuery(
             token=root,
             query=JSONPathQuery(
                 env=self.env,
-                segments=tuple(self.parse_path(stream, in_filter=True)),
+                segments=tuple(self.parse_query(stream, in_filter=True)),
             ),
         )
 
-    def parse_self_path(self, stream: TokenStream) -> Expression:
+    def parse_relative_query(self, stream: TokenStream) -> Expression:
         tok = stream.next_token()
         return RelativeFilterQuery(
             token=tok,
             query=JSONPathQuery(
-                env=self.env, segments=tuple(self.parse_path(stream, in_filter=True))
+                env=self.env, segments=tuple(self.parse_query(stream, in_filter=True))
             ),
         )
 
