@@ -48,7 +48,6 @@ class TokenType(Enum):
     GT = auto()
     INT = auto()
     LE = auto()
-    LG = auto()
     LPAREN = auto()
     LT = auto()
     NE = auto()
