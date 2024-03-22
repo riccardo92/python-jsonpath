@@ -294,7 +294,11 @@ def lex_inside_filter(l: Lexer) -> Optional[StateFn]:  # noqa: D103, PLR0915, PL
         l.ignore_whitespace()
         c = l.next()
 
-        if c in ("", "]"):
+        if c == "":
+            l.error("unclosed bracketed selection")
+            return None
+
+        if c == "]":
             l.filter_depth -= 1
             if len(l.paren_stack) == 1:
                 l.error("unbalanced parentheses")
