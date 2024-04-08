@@ -18,7 +18,7 @@ class TokenType(Enum):
 
     EOF = auto()
     ERROR = auto()
-    SKIP = auto()
+    INIT = auto()
 
     SHORTHAND_PROPERTY = auto()
     COLON = auto()
@@ -31,10 +31,6 @@ class TokenType(Enum):
     PROPERTY = auto()
     RBRACKET = auto()
     ROOT = auto()
-    SLICE = auto()
-    SLICE_START = auto()
-    SLICE_STEP = auto()
-    SLICE_STOP = auto()
     WILD = auto()
 
     AND = auto()
@@ -116,7 +112,7 @@ class TokenStream:
     def __init__(self, token_iter: Iterable[Token]):
         self.iter = iter(token_iter)
         self._pushed: Deque[Token] = deque()
-        self.current = Token(TokenType.SKIP, "", -1, "")
+        self.current = Token(TokenType.INIT, "", -1, "")
         next(self)
 
     class TokenStreamIterator:
