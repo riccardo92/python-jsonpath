@@ -85,3 +85,6 @@ profile_.py
 # Test fixtures
 comparison_regression_suite.yaml
 cts.json
+
+# System
+.DS_Store

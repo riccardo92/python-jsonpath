@@ -107,7 +107,7 @@ class Parser:
             TokenType.INT: self.parse_integer_literal,
             TokenType.LPAREN: self.parse_grouped_expression,
             TokenType.NOT: self.parse_prefix_expression,
-            TokenType.NULL: self.parse_nil,
+            TokenType.NULL: self.parse_null,
             TokenType.ROOT: self.parse_root_query,
             TokenType.CURRENT: self.parse_relative_query,
             TokenType.SINGLE_QUOTE_STRING: self.parse_string_literal,
@@ -122,7 +122,7 @@ class Parser:
             TokenType.FLOAT: self.parse_float_literal,
             TokenType.FUNCTION: self.parse_function_extension,
             TokenType.INT: self.parse_integer_literal,
-            TokenType.NULL: self.parse_nil,
+            TokenType.NULL: self.parse_null,
             TokenType.ROOT: self.parse_root_query,
             TokenType.CURRENT: self.parse_relative_query,
             TokenType.SINGLE_QUOTE_STRING: self.parse_string_literal,
@@ -229,7 +229,7 @@ class Parser:
             stream.expect(TokenType.COLON)
             stream.next_token()
 
-        # // 1 or ?
+        # 1 or ?
         if _maybe_index(stream.current):
             step = int(stream.current.value)
             stream.next_token()
@@ -350,7 +350,7 @@ class Parser:
             return BooleanLiteral(stream.current, True)  # noqa: FBT003
         return BooleanLiteral(stream.current, False)  # noqa: FBT003
 
-    def parse_nil(self, stream: TokenStream) -> Expression:
+    def parse_null(self, stream: TokenStream) -> Expression:
         return NullLiteral(stream.current, None)
 
     def parse_string_literal(self, stream: TokenStream) -> Expression:
