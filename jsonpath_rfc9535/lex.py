@@ -16,10 +16,10 @@ from .tokens import TokenType
 
 RE_WHITESPACE = re.compile(r"[ \n\r\t]+")
 RE_PROPERTY = re.compile(r"[\u0080-\uFFFFa-zA-Z_][\u0080-\uFFFFa-zA-Z0-9_-]*")
-RE_INDEX = re.compile(r"-?\d+")
+RE_INDEX = re.compile(r"-?[0-9]+")
 RE_INT = re.compile(r"-?[0-9]+")
-RE_EXPONENT = re.compile(r"e[+-]?\d+")
-RE_NEGATIVE_EXPONENT = re.compile(r"e-\d+")
+RE_EXPONENT = re.compile(r"e[+-]?[0-9]+")
+RE_NEGATIVE_EXPONENT = re.compile(r"e-[0-9]+")
 RE_FUNCTION_NAME = re.compile(r"[a-z][a-z_0-9]*")
 RE_AND = re.compile(r"&&")
 RE_OR = re.compile(r"\|\|")
@@ -158,9 +158,10 @@ def lex_root(l: Lexer) -> Optional[StateFn]:  # noqa: D103
     return lex_segment
 
 
-def lex_segment(l: Lexer) -> Optional[StateFn]:  # noqa: D103
+def lex_segment(l: Lexer) -> Optional[StateFn]:  # noqa: D103, PLR0911
     if l.ignore_whitespace() and not l.peek():
         l.error("unexpected trailing whitespace")
+        return None
 
     c = l.next()
 
@@ -281,7 +282,7 @@ def lex_inside_bracketed_segment(l: Lexer) -> Optional[StateFn]:  # noqa: PLR091
         l.backup()
 
         if l.accept_match(RE_INDEX):
-            # Index selector of part of a slice selector.
+            # Index selector or part of a slice selector.
             l.emit(TokenType.INDEX)
             continue
 
