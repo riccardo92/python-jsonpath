@@ -13,7 +13,7 @@ def map_re(pattern: str) -> str:
 
         if ch == ".":
             if not char_class:
-                parts.append(r"(?:(?![\r\n])\P{Cs}|\\p{Cs}\p{Cs})")
+                parts.append(r"(?:(?![\r\n])\P{Cs}|\p{Cs}\p{Cs})")
             else:
                 parts.append(ch)
         elif ch == "\\":
