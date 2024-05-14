@@ -5,6 +5,8 @@ import regex as re
 from jsonpath_rfc9535.function_extensions import ExpressionType
 from jsonpath_rfc9535.function_extensions import FilterFunction
 
+from ._pattern import map_re
+
 
 class Match(FilterFunction):
     """The standard `match` function."""
@@ -16,6 +18,6 @@ class Match(FilterFunction):
         """Return `True` if _string_ matches _pattern_, or `False` otherwise."""
         try:
             # re.fullmatch caches compiled patterns internally
-            return bool(re.fullmatch(pattern, string))
+            return bool(re.fullmatch(map_re(pattern), string))
         except (TypeError, re.error):
             return False

@@ -114,6 +114,9 @@ class Parser:
             TokenType.TRUE: self.parse_boolean,
         }
 
+        # TODO: can a function argument be a grouped expression?
+        # TODO: can a function argument contain a !?
+
         self.function_argument_map: Dict[
             TokenType, Callable[[TokenStream], Expression]
         ] = {
@@ -412,6 +415,7 @@ class Parser:
                 raise JSONPathSyntaxError(
                     "unbalanced parentheses", token=stream.current
                 )
+            # TODO: only if binary op
             expr = self.parse_infix_expression(stream, expr)
 
         stream.expect(TokenType.RPAREN)
