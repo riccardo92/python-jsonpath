@@ -217,7 +217,7 @@ class JSONPathEnvironment:
                     )
             elif typ == ExpressionType.LOGICAL:
                 if not isinstance(
-                    arg, (FilterQuery, (LogicalExpression, ComparisonExpression))
+                    arg, (FilterQuery, LogicalExpression, ComparisonExpression)
                 ):
                     raise JSONPathTypeError(
                         f"{token.value}() argument {idx} must be of LogicalType",

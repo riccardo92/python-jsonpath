@@ -186,6 +186,7 @@ class LogicalExpression(Expression):
 
     def evaluate(self, context: FilterContext) -> bool:
         """Evaluate the filter expression in the given _context_."""
+        # TODO: sort circuit eval of right if left is false
         return _compare(
             self.left.evaluate(context), self.operator, self.right.evaluate(context)
         )

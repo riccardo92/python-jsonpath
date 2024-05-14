@@ -32,7 +32,7 @@ class JSONPathQuery:
         segments: The `JSONPathSegment` instances that make up this query.
     """
 
-    __slots__ = ("env", "fake_root", "segments")
+    __slots__ = ("env", "segments")
 
     def __init__(
         self,

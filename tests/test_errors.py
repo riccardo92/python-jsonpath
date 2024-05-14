@@ -97,12 +97,12 @@ BAD_FILTER_LITERAL_TEST_CASES: List[FilterLiteralTestCase] = [
     FilterLiteralTestCase("just int", "$[?2]"),
     FilterLiteralTestCase("just float", "$[?2.2]"),
     FilterLiteralTestCase("just null", "$[?null]"),
-    FilterLiteralTestCase("literal and literal", "$[?true and false]"),
-    FilterLiteralTestCase("literal or literal", "$[?true or false]"),
-    FilterLiteralTestCase("comparison and literal", "$[?true == false and false]"),
-    FilterLiteralTestCase("comparison or literal", "$[?true == false or false]"),
-    FilterLiteralTestCase("literal and comparison", "$[?true and true == false]"),
-    FilterLiteralTestCase("literal or comparison", "$[?false or true == false]"),
+    FilterLiteralTestCase("literal and literal", "$[?true && false]"),
+    FilterLiteralTestCase("literal or literal", "$[?true || false]"),
+    FilterLiteralTestCase("comparison and literal", "$[?true == false && false]"),
+    FilterLiteralTestCase("comparison or literal", "$[?true == false || false]"),
+    FilterLiteralTestCase("literal and comparison", "$[?true && true == false]"),
+    FilterLiteralTestCase("literal or comparison", "$[?false || true == false]"),
 ]
 
 

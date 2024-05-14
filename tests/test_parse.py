@@ -72,11 +72,6 @@ TEST_CASES = [
         want="$['some'][?@['thing'] >= 7]",
     ),
     Case(
-        description="filter with >=",
-        query="$.some[?(@.thing >= 7)]",
-        want="$['some'][?@['thing'] >= 7]",
-    ),
-    Case(
         description="filter with !=",
         query="$.some[?(@.thing != 7)]",
         want="$['some'][?@['thing'] != 7]",
