@@ -41,10 +41,9 @@ import dataclasses
 import operator
 
 import pytest
-
-from jsonpath_rfc9535.filter_expressions import NOTHING
-from jsonpath_rfc9535.filter_expressions import _compare
-from jsonpath_rfc9535.node import JSONPathNodeList
+from jsonpath_ext.filter_expressions import NOTHING
+from jsonpath_ext.filter_expressions import _compare
+from jsonpath_ext.node import JSONPathNodeList
 
 
 @dataclasses.dataclass

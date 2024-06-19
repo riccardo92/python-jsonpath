@@ -4,8 +4,7 @@ import dataclasses
 import operator
 
 import pytest
-
-from jsonpath_rfc9535.filter_expressions import _compare
+from jsonpath_ext.filter_expressions import _compare
 
 
 @dataclasses.dataclass

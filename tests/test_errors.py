@@ -4,11 +4,10 @@ from typing import List
 from typing import NamedTuple
 
 import pytest
-
-from jsonpath_rfc9535 import JSONPathEnvironment
-from jsonpath_rfc9535.exceptions import JSONPathRecursionError
-from jsonpath_rfc9535.exceptions import JSONPathSyntaxError
-from jsonpath_rfc9535.exceptions import JSONPathTypeError
+from jsonpath_ext import JSONPathEnvironment
+from jsonpath_ext.exceptions import JSONPathRecursionError
+from jsonpath_ext.exceptions import JSONPathSyntaxError
+from jsonpath_ext.exceptions import JSONPathTypeError
 
 
 @pytest.fixture()

@@ -1,16 +1,11 @@
-[build-system]
-requires = ["hatchling"]
-build-backend = "hatchling.build"
-
 [project]
-name = "jsonpath-rfc9535"
+name = "jsonpath-ext"
 dynamic = ["version"]
-description = 'RFC 9535 - JSONPath: Query Expressions for JSON in Python'
+description = 'RFC 9535 - JSONPath: Query Expressions for JSON in Python with non-rfc9535 extensions.'
 readme = "README.md"
 requires-python = ">=3.8"
-license = "MIT"
 keywords = []
-authors = [{ name = "James Prior", email = "jamesgr.prior@gmail.com" }]
+authors = [{ name = "Riccardo Tiebax", email = "riccardo.t@gmail.com" }]
 classifiers = [
   "Development Status :: 4 - Beta",
   "Intended Audience :: Developers",
@@ -27,74 +22,70 @@ classifiers = [
 dependencies = ["regex", "iregexp-check>=0.1.3"]
 
 [project.urls]
-Documentation = "https://jg-rp.github.io/python-jsonpath-rfc9535/"
-Issues = "https://github.com/jg-rp/python-jsonpath-rfc9535/issues"
-Source = "https://github.com/jg-rp/python-jsonpath-rfc9535"
+Documentation = "https://jg-rp.github.io/python-jsonpath-ext/"
+Issues = "https://github.com/riccardo92/python-jsonpath-ext/issues"
+Source = "https://github.com/riccardo92/python-jsonpath-ext"
 
 [project.scripts]
-jsonpath-rfc9535 = "jsonpath_rfc9535.cli:main"
+jsonpath-ext = "src.jsonpath_ext.cli:main"
 
-[tool.hatch.version]
-path = "jsonpath_rfc9535/__about__.py"
-
-[tool.hatch.build.targets.sdist]
-include = ["/jsonpath_rfc9535"]
-
-[tool.hatch.build.targets.wheel]
-include = ["/jsonpath_rfc9535"]
-
-[tool.hatch.envs.default]
-dependencies = [
-  "black",
-  "mypy",
-  "pytest-cov",
-  "pytest",
-  "pyyaml",
-  "ruff",
-  "twine",
-  "types-pyyaml",
-  "types-regex",
+[project.optional-dependencies]
+pre-commit = [
+  "deptry==0.16.1",
+  "pre-commit==3.7.0",
+  "ruff==0.4.2",
+  "tox==4.15.1"
 ]
-
-[tool.hatch.envs.default.scripts]
-cov = "pytest --cov-report=term-missing --cov-config=pyproject.toml --cov=jsonpath_rfc9535 --cov=tests {args}"
-cov-html = "pytest --cov-report=html --cov-config=pyproject.toml --cov=jsonpath_rfc9535 --cov=tests {args}"
-no-cov = "cov --no-cov {args}"
-test = "pytest {args}"
-lint = "ruff check ."
-typing = "mypy"
-
-[[tool.hatch.envs.all.matrix]]
-python = ["3.8", "3.9", "3.10", "3.11", "3.12"]
 
 [tool.coverage.run]
 branch = true
 parallel = true
 omit = [
-  "jsonpath_rfc9535/__about__.py",
-  "jsonpath_rfc9535/__main__.py",
-  "jsonpath_rfc9535/utils/nondeterministic_descent.py",
+  "src/jsonpath_ext/__about__.py",
+  "src/jsonpath_ext/__main__.py",
+  "src/jsonpath_ext/utils/nondeterministic_descent.py",
 ]
 
 [tool.coverage.report]
 exclude_lines = ["no cov", "if __name__ == .__main__.:", "if TYPE_CHECKING:"]
 
-[tool.mypy]
-files = "jsonpath_rfc9535"
-python_version = "3.10"
-disallow_subclassing_any = true
-disallow_untyped_calls = true
-disallow_untyped_defs = true
-disallow_incomplete_defs = true
-no_implicit_optional = true
-local_partial_types = true
-no_implicit_reexport = true
-strict = true
-warn_redundant_casts = true
-warn_unused_configs = true
-warn_unused_ignores = false
-warn_return_any = true
-warn_unreachable = true
+[build-system]
+requires = ["setuptools>=64.0.0", "wheel>=0.30"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+minversion = "8.0"
+addopts = "-ra -q"
+testpaths = ["tests"]
+pythonpath = ["app"]
+
+[tool.pytest]
+testpaths = "tests"
+
+[tool.isort]
+profile = "black"
+known_third_party = ["pytest"]
+
+[tool.commitizen]
+name = "cz_conventional_commits"
+version = "0.0.1"
+tag_format = "$version"
+changelog_incremental = true
+update_changelog_on_bump = true
+version_files = ["src/jsonpath_ext/__init__.py:__version__", "pyproject.toml:^version"]
+bump_message = "release $current_version -> $new_version"
+
+[tool.deptry]
+ignore_notebooks = true
+extend_exclude = ["examples"]
+pep621_dev_dependency_groups = ["pre-commit"]
+known_first_party = ["jsonpath_ext"]
+
+[tool.deptry.package_module_name_map]
+jsonpath-ext = "jsonath_ext"
 
 [tool.ruff]
 # Exclude a variety of commonly ignored directories.
@@ -173,13 +164,14 @@ force-single-line = true
 convention = "google"
 
 [tool.ruff.lint.per-file-ignores]
-"jsonpath_rfc9535/utils/__init__.py" = ["D104"]
-"jsonpath_rfc9535/__about__.py" = ["D100"]
-"jsonpath_rfc9535/__init__.py" = ["D104"]
+"src/__init__.py" = ["D104"]
+"src/jsonpath_ext/utils/__init__.py" = ["D104"]
+"src/jsonpath_ext/__about__.py" = ["D100"]
+"src/jsonpath_ext/__init__.py" = ["D104"]
 "scripts/__init__.py" = ["D104"]
 "tests/*" = ["D100", "D101", "D104", "D103"]
-"jsonpath_rfc9535/lex.py" = ["E741"]
-"jsonpath_rfc9535/utils/nondeterministic_descent.py" = [
+"src/jsonpath_ext/lex.py" = ["E741"]
+"src/jsonpath_ext/utils/nondeterministic_descent.py" = [
   "D103",
   "D101",
   "D102",

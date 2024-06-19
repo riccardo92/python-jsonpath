@@ -40,7 +40,7 @@ class Lexer:
 
         self.paren_stack: List[int] = []
         """A running count of parentheses for each, possibly nested, function call.
-        
+
         If the stack is empty, we are not in a function call. Remember that
         function arguments can be arbitrarily nested in parentheses.
         """
@@ -175,6 +175,10 @@ def lex_segment(l: Lexer) -> Optional[StateFn]:  # noqa: D103, PLR0911
             l.emit(TokenType.DOUBLE_DOT)
             return lex_descendant_segment
         return lex_shorthand_selector
+
+    if c == "~":
+        l.emit(TokenType.TILDE)
+        return lex_segment
 
     if c == "[":
         l.emit(TokenType.LBRACKET)

@@ -27,7 +27,7 @@ def valid_queries() -> Sequence[CTSCase]:
 
 QUERIES = valid_queries()
 
-COMPILE_AND_FIND_SETUP = "from jsonpath_rfc9535 import find"
+COMPILE_AND_FIND_SETUP = "from jsonpath_ext import find"
 
 COMPILE_AND_FIND_STMT = """\
 for path, data in QUERIES:
@@ -37,14 +37,14 @@ COMPILE_AND_FIND_VALUES_STMT = """\
 for path, data in QUERIES:
     [node.value for node in find(path, data)]"""
 
-JUST_COMPILE_SETUP = "from jsonpath_rfc9535 import compile"
+JUST_COMPILE_SETUP = "from jsonpath_ext import compile"
 
 JUST_COMPILE_STMT = """\
 for path, _ in QUERIES:
     compile(path)"""
 
 JUST_FIND_SETUP = """\
-from jsonpath_rfc9535 import compile
+from jsonpath_ext import compile
 compiled_queries = [(compile(q), d) for q, d in QUERIES]
 """
 

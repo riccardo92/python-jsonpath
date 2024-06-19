@@ -4,12 +4,12 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from jsonpath_rfc9535.filter_expressions import NOTHING
-from jsonpath_rfc9535.function_extensions import ExpressionType
-from jsonpath_rfc9535.function_extensions import FilterFunction
+from jsonpath_ext.filter_expressions import NOTHING
+from jsonpath_ext.function_extensions import ExpressionType
+from jsonpath_ext.function_extensions import FilterFunction
 
 if TYPE_CHECKING:
-    from jsonpath_rfc9535.node import JSONPathNodeList
+    from jsonpath_ext.node import JSONPathNodeList
 
 
 class Value(FilterFunction):

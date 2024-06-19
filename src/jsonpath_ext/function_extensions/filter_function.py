@@ -1,4 +1,5 @@
 """Classes modeling the JSONPath spec type system for function extensions."""
+
 from abc import ABC
 from abc import abstractmethod
 from enum import Enum

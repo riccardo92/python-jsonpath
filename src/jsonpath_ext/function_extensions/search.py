@@ -2,9 +2,8 @@
 
 import regex as re
 from iregexp_check import check
-
-from jsonpath_rfc9535.function_extensions import ExpressionType
-from jsonpath_rfc9535.function_extensions import FilterFunction
+from jsonpath_ext.function_extensions import ExpressionType
+from jsonpath_ext.function_extensions import FilterFunction
 
 from ._pattern import map_re
 

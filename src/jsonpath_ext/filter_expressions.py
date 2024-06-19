@@ -11,8 +11,8 @@ from typing import List
 from typing import Sequence
 from typing import TypeVar
 
-from jsonpath_rfc9535.function_extensions.filter_function import ExpressionType
-from jsonpath_rfc9535.function_extensions.filter_function import FilterFunction
+from jsonpath_ext.function_extensions.filter_function import ExpressionType
+from jsonpath_ext.function_extensions.filter_function import FilterFunction
 
 from .exceptions import JSONPathTypeError
 from .node import JSONPathNodeList
