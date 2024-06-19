@@ -5,7 +5,7 @@ import json
 import pathlib
 
 import pytest
-from jsonpath_ext.__about__ import __version__
+from jsonpath_ext.__init__ import __version__
 from jsonpath_ext.cli import handle_path_command
 from jsonpath_ext.cli import setup_parser
 from jsonpath_ext.exceptions import JSONPathIndexError

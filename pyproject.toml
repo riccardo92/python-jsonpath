@@ -41,7 +41,6 @@ pre-commit = [
 branch = true
 parallel = true
 omit = [
-  "src/jsonpath_ext/__about__.py",
   "src/jsonpath_ext/__main__.py",
   "src/jsonpath_ext/utils/nondeterministic_descent.py",
 ]
@@ -166,7 +165,6 @@ convention = "google"
 [tool.ruff.lint.per-file-ignores]
 "src/__init__.py" = ["D104"]
 "src/jsonpath_ext/utils/__init__.py" = ["D104"]
-"src/jsonpath_ext/__about__.py" = ["D100"]
 "src/jsonpath_ext/__init__.py" = ["D104"]
 "scripts/__init__.py" = ["D104"]
 "tests/*" = ["D100", "D101", "D104", "D103"]

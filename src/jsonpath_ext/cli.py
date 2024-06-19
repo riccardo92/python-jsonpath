@@ -5,7 +5,7 @@ import json
 import sys
 
 import jsonpath_ext as jsonpath
-from jsonpath_ext.__about__ import __version__
+from jsonpath_ext.__init__ import __version__
 from jsonpath_ext.exceptions import JSONPathIndexError
 from jsonpath_ext.exceptions import JSONPathSyntaxError
 from jsonpath_ext.exceptions import JSONPathTypeError
