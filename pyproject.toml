@@ -70,7 +70,7 @@ known_third_party = ["pytest"]
 
 [tool.commitizen]
 name = "cz_conventional_commits"
-version = "0.0.2"
+version = "0.0.3"
 tag_format = "$version"
 changelog_incremental = true
 update_changelog_on_bump = true
