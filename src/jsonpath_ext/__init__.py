@@ -13,7 +13,7 @@ from .node import JSONPathNodeList
 from .parse import Parser
 from .query import JSONPathQuery
 
-__version__ = "0.0.1"
+__version__ = "0.0.2"
 
 __all__ = (
     "JSONValue",
