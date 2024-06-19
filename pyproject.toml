@@ -1,7 +1,6 @@
 [project]
 name = "jsonpath-ext"
 version = "0.0.4"
-dynamic = ["version"]
 description = 'RFC 9535 - JSONPath: Query Expressions for JSON in Python with non-rfc9535 extensions.'
 readme = "README.md"
 requires-python = ">=3.8"
