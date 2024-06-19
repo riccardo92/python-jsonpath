@@ -1,5 +1,6 @@
 [project]
 name = "jsonpath-ext"
+version = "0.0.3"
 dynamic = ["version"]
 description = 'RFC 9535 - JSONPath: Query Expressions for JSON in Python with non-rfc9535 extensions.'
 readme = "README.md"
@@ -84,7 +85,7 @@ pep621_dev_dependency_groups = ["pre-commit"]
 known_first_party = ["jsonpath_ext"]
 
 [tool.deptry.package_module_name_map]
-jsonpath-ext = "jsonath_ext"
+jsonpath-ext = "jsonpath_ext"
 
 [tool.ruff]
 # Exclude a variety of commonly ignored directories.
