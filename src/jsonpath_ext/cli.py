@@ -4,18 +4,18 @@ import argparse
 import json
 import sys
 
-import jsonpath_rfc9535 as jsonpath
-from jsonpath_rfc9535.__about__ import __version__
-from jsonpath_rfc9535.exceptions import JSONPathIndexError
-from jsonpath_rfc9535.exceptions import JSONPathSyntaxError
-from jsonpath_rfc9535.exceptions import JSONPathTypeError
+import jsonpath_ext as jsonpath
+from jsonpath_ext.__init__ import __version__
+from jsonpath_ext.exceptions import JSONPathIndexError
+from jsonpath_ext.exceptions import JSONPathSyntaxError
+from jsonpath_ext.exceptions import JSONPathTypeError
 
 INDENT = 2
 
 _EPILOG = """\
 Example usage:
   Find values in source.json matching a JSONPath expression, output to result.json.
-  $ jsonpath-rfc9535 -q "$.foo['bar'][?@.baz > 1]" -f source.json -o result.json
+  $ jsonpath-ext -q "$.foo['bar'][?@.baz > 1]" -f source.json -o result.json
 """
 
 
@@ -28,7 +28,7 @@ class DescriptionHelpFormatter(
 
 def setup_parser() -> argparse.ArgumentParser:  # noqa: D103
     parser = argparse.ArgumentParser(
-        prog="jsonpath-rfc9535",
+        prog="jsonpath-ext",
         formatter_class=DescriptionHelpFormatter,
         description=(
             "Find values in a JSON document given an RFC 9535 JSONPath expression."
@@ -40,7 +40,7 @@ def setup_parser() -> argparse.ArgumentParser:  # noqa: D103
         "-v",
         "--version",
         action="version",
-        version=f"jsonpath-rfc9535, version {__version__}",
+        version=f"jsonpath-ext, version {__version__}",
         help="Show the version and exit.",
     )
 

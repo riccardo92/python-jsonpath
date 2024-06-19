@@ -6,14 +6,14 @@ import json
 import sys
 from typing import TYPE_CHECKING
 
-from jsonpath_rfc9535.utils.nondeterministic_descent import AuxNode
-from jsonpath_rfc9535.utils.nondeterministic_descent import all_perms
-from jsonpath_rfc9535.utils.nondeterministic_descent import breadth_first_visit
-from jsonpath_rfc9535.utils.nondeterministic_descent import pp_tree
-from jsonpath_rfc9535.utils.nondeterministic_descent import pre_order_visit
+from jsonpath_ext.utils.nondeterministic_descent import AuxNode
+from jsonpath_ext.utils.nondeterministic_descent import all_perms
+from jsonpath_ext.utils.nondeterministic_descent import breadth_first_visit
+from jsonpath_ext.utils.nondeterministic_descent import pp_tree
+from jsonpath_ext.utils.nondeterministic_descent import pre_order_visit
 
 if TYPE_CHECKING:
-    from jsonpath_rfc9535 import JSONValue
+    from jsonpath_ext import JSONValue
 
 
 def pp_json_path_perms(data: JSONValue) -> None:  # noqa: D103

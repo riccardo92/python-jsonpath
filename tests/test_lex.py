@@ -3,10 +3,9 @@ import operator
 from typing import List
 
 import pytest
-
-from jsonpath_rfc9535.lex import lex
-from jsonpath_rfc9535.tokens import Token
-from jsonpath_rfc9535.tokens import TokenType
+from jsonpath_ext.lex import lex
+from jsonpath_ext.tokens import Token
+from jsonpath_ext.tokens import TokenType
 
 
 @dataclasses.dataclass

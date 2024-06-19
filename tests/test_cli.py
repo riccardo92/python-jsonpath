@@ -5,13 +5,12 @@ import json
 import pathlib
 
 import pytest
-
-from jsonpath_rfc9535.__about__ import __version__
-from jsonpath_rfc9535.cli import handle_path_command
-from jsonpath_rfc9535.cli import setup_parser
-from jsonpath_rfc9535.exceptions import JSONPathIndexError
-from jsonpath_rfc9535.exceptions import JSONPathSyntaxError
-from jsonpath_rfc9535.exceptions import JSONPathTypeError
+from jsonpath_ext.__init__ import __version__
+from jsonpath_ext.cli import handle_path_command
+from jsonpath_ext.cli import setup_parser
+from jsonpath_ext.exceptions import JSONPathIndexError
+from jsonpath_ext.exceptions import JSONPathSyntaxError
+from jsonpath_ext.exceptions import JSONPathTypeError
 
 SAMPLE_DATA = {
     "categories": [
@@ -98,7 +97,7 @@ def test_version(
 
     captured = capsys.readouterr()
     assert err.value.code == 0
-    assert captured.out.strip() == f"jsonpath-rfc9535, version {__version__}"
+    assert captured.out.strip() == f"jsonpath-ext, version {__version__}"
 
 
 def test_path_command_invalid_target(

@@ -40,12 +40,11 @@ import dataclasses
 import operator
 
 import pytest
-
-from jsonpath_rfc9535 import JSONPathEnvironment
-from jsonpath_rfc9535.exceptions import JSONPathTypeError
-from jsonpath_rfc9535.function_extensions import ExpressionType
-from jsonpath_rfc9535.function_extensions import FilterFunction
-from jsonpath_rfc9535.node import JSONPathNodeList
+from jsonpath_ext import JSONPathEnvironment
+from jsonpath_ext.exceptions import JSONPathTypeError
+from jsonpath_ext.function_extensions import ExpressionType
+from jsonpath_ext.function_extensions import FilterFunction
+from jsonpath_ext.node import JSONPathNodeList
 
 
 @dataclasses.dataclass

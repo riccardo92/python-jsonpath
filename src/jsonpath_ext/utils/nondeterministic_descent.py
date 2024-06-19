@@ -15,7 +15,7 @@ from typing import TextIO
 from typing import Tuple
 
 if TYPE_CHECKING:
-    from jsonpath_rfc9535.environment import JSONValue
+    from jsonpath_ext.environment import JSONValue
 
 
 HORIZONTAL_SEP = "\N{BOX DRAWINGS LIGHT HORIZONTAL}" * 2

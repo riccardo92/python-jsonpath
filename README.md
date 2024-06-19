@@ -5,18 +5,18 @@ We follow <a href="https://datatracker.ietf.org/doc/html/rfc9535">RFC 9535</a> s
 </p>
 
 <p align="center">
-  <a href="https://github.com/jg-rp/python-jsonpath-rfc9535/blob/main/LICENSE.txt">
-    <img src="https://img.shields.io/pypi/l/jsonpath-rfc9535.svg?style=flat-square" alt="License">
+  <a href="https://github.com/riccardo92/python-jsonpath-ext/blob/main/LICENSE.txt">
+    <img src="https://img.shields.io/pypi/l/jsonpath-ext.svg?style=flat-square" alt="License">
   </a>
-  <a href="https://github.com/jg-rp/python-jsonpath-rfc9535/actions">
-    <img src="https://img.shields.io/github/actions/workflow/status/jg-rp/python-jsonpath-rfc9535/tests.yaml?branch=main&label=tests&style=flat-square" alt="Tests">
+  <a href="https://github.com/riccardo92/python-jsonpath-ext/actions">
+    <img src="https://img.shields.io/github/actions/workflow/status/jg-rp/python-jsonpath-ext/tests.yaml?branch=main&label=tests&style=flat-square" alt="Tests">
   </a>
   <br>
-  <a href="https://pypi.org/project/jsonpath-rfc9535">
-    <img src="https://img.shields.io/pypi/v/jsonpath-rfc9535.svg?style=flat-square" alt="PyPi - Version">
+  <a href="https://pypi.org/project/jsonpath-ext">
+    <img src="https://img.shields.io/pypi/v/jsonpath-ext.svg?style=flat-square" alt="PyPi - Version">
   </a>
-  <a href="https://pypi.org/project/jsonpath-rfc9535">
-    <img src="https://img.shields.io/pypi/pyversions/jsonpath-rfc9535.svg?style=flat-square" alt="Python versions">
+  <a href="https://pypi.org/project/jsonpath-ext">
+    <img src="https://img.shields.io/pypi/pyversions/jsonpath-ext.svg?style=flat-square" alt="Python versions">
   </a>
 </p>
 
@@ -36,19 +36,19 @@ We follow <a href="https://datatracker.ietf.org/doc/html/rfc9535">RFC 9535</a> s
 Install Python JSONPath RFC 9535 using [pip](https://pip.pypa.io/en/stable/getting-started/):
 
 ```
-pip install jsonpath-rfc9535
+pip install jsonpath-ext
 ```
 
 Or [Pipenv](https://pipenv.pypa.io/en/latest/):
 
 ```
-pipenv install -u jsonpath-rfc9535
+pipenv install -u jsonpath-ext
 ```
 
 ## Example
 
 ```python
-import jsonpath_rfc9535 as jsonpath
+import jsonpath_ext as jsonpath
 
 data = {
     "users": [
@@ -71,7 +71,7 @@ Or, reading JSON data from a file:
 
 ```python
 import json
-import jsonpath_rfc9535 as jsonpath
+import jsonpath_ext as jsonpath
 
 with open("/path/to/some.json", encoding="utf-8") as fd:
     data = json.load(fd)
@@ -84,7 +84,7 @@ values = nodes.values()
 You could read data from a YAML formatted file too. If you have [PyYaml](https://pyyaml.org/wiki/PyYAML) installed:
 
 ```python
-import jsonpath_rfc9535 as jsonpath
+import jsonpath_ext as jsonpath
 import yaml
 
 with open("some.yaml") as fd:
@@ -96,14 +96,14 @@ products = jsonpath.find("$..products.*", data).values()
 
 ## Links
 
-- Change log: https://github.com/jg-rp/python-jsonpath-rfc9535/blob/main/CHANGELOG.md
-- PyPi: https://pypi.org/project/jsonpath-rfc9535
-- Source code: https://github.com/jg-rp/python-jsonpath-rfc9535
-- Issue tracker: https://github.com/jg-rp/python-jsonpath-rfc9535/issues
+- Change log: https://github.com/riccardo92/python-jsonpath-ext/blob/main/CHANGELOG.md
+- PyPi: https://pypi.org/project/jsonpath-ext
+- Source code: https://github.com/riccardo92/python-jsonpath-ext
+- Issue tracker: https://github.com/riccardo92/python-jsonpath-ext/issues
 
 ## Related projects
 
-- [Python JSONPath](https://github.com/jg-rp/python-jsonpath) - Another Python package implementing JSONPath, but with additional features and customization options.
+- [Python JSONPath](https://github.com/riccardo92/python-jsonpath) - Another Python package implementing JSONPath, but with additional features and customization options.
 - [JSON P3](https://github.com/jg-rp/json-p3) - RFC 9535 implemented in TypeScript.
 
 ## API
@@ -123,7 +123,7 @@ Each `JSONPathNode` has:
 - a `path()` method, which returns the normalized path to the node in the target JSON document.
 
 ```python
-import jsonpath_rfc9535 as jsonpath
+import jsonpath_ext as jsonpath
 
 value = {
     "users": [
@@ -176,7 +176,7 @@ def find_one(query, value):
 `find(query, value)` is a convenience function for `JSONPathEnvironment().compile(query).apply(value)`. Use `compile(query)` to obtain a `JSONPathQuery` instance which can be applied to difference JSON-like values repeatedly.
 
 ```python
-import jsonpath_rfc9535 as jsonpath
+import jsonpath_ext as jsonpath
 
 value = {
     "users": [
@@ -201,4 +201,4 @@ A `JSONPathQuery` has a `finditer(value)` method too, and `find(value)` is an al
 
 ## License
 
-`python-jsonpath-rfc9535` is distributed under the terms of the [MIT](https://spdx.org/licenses/MIT.html) license.
+`python-jsonpath-ext` is distributed under the terms of the [MIT](https://spdx.org/licenses/MIT.html) license.

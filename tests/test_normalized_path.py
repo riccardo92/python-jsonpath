@@ -6,8 +6,7 @@ from typing import List
 from typing import Union
 
 import pytest
-
-from jsonpath_rfc9535 import JSONPathEnvironment
+from jsonpath_ext import JSONPathEnvironment
 
 
 @dataclasses.dataclass

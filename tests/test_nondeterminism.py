@@ -41,9 +41,8 @@ from typing import List
 from typing import Tuple
 
 import pytest
-
-from jsonpath_rfc9535 import JSONPathEnvironment
-from jsonpath_rfc9535 import JSONValue
+from jsonpath_ext import JSONPathEnvironment
+from jsonpath_ext import JSONValue
 
 
 class NondeterministicEnv(JSONPathEnvironment):

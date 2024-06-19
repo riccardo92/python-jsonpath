@@ -3,10 +3,10 @@
 from collections.abc import Sized
 from typing import Union
 
-from jsonpath_rfc9535.filter_expressions import NOTHING
-from jsonpath_rfc9535.filter_expressions import Nothing
-from jsonpath_rfc9535.function_extensions import ExpressionType
-from jsonpath_rfc9535.function_extensions import FilterFunction
+from jsonpath_ext.filter_expressions import NOTHING
+from jsonpath_ext.filter_expressions import Nothing
+from jsonpath_ext.function_extensions import ExpressionType
+from jsonpath_ext.function_extensions import FilterFunction
 
 
 class Length(FilterFunction):

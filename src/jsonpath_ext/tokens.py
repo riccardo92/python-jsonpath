@@ -30,6 +30,7 @@ class TokenType(Enum):
     LBRACKET = auto()
     PROPERTY = auto()
     RBRACKET = auto()
+    TILDE = auto()
     ROOT = auto()
     WILD = auto()
 

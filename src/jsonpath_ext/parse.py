@@ -11,8 +11,8 @@ from typing import List
 from typing import Optional
 from typing import Tuple
 
-from jsonpath_rfc9535.function_extensions.filter_function import ExpressionType
-from jsonpath_rfc9535.function_extensions.filter_function import FilterFunction
+from jsonpath_ext.function_extensions.filter_function import ExpressionType
+from jsonpath_ext.function_extensions.filter_function import FilterFunction
 
 from .exceptions import JSONPathSyntaxError
 from .exceptions import JSONPathTypeError

@@ -12,10 +12,9 @@ from typing import Dict
 from typing import List
 from typing import Optional
 
+import jsonpath_ext as jsonpath
 import pytest
-
-import jsonpath_rfc9535 as jsonpath
-from jsonpath_rfc9535.environment import JSONValue
+from jsonpath_ext.environment import JSONValue
 
 
 @dataclass
