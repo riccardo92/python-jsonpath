@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.0.5 (2024-06-19)
+
+### Fix
+
+- **pyproject.toml**: removed dyanmic prop forversion
+
 ## 0.0.4 (2024-06-19)
 
 ### Fix
