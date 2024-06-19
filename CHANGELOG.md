@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.0.4 (2024-06-19)
+
+### Fix
+
+- **pyproject.toml**: added missing version to pyproject.toml
+
 ## 0.0.3 (2024-06-19)
 
 ### Fix
